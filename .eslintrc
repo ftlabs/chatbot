@@ -18,7 +18,6 @@
     "wrap-iife": 2,
     "new-cap": 2,
     "no-caller": 2,
-    "quotes": [1, "single"],
     "no-loop-func": 2,
     "no-irregular-whitespace": 1,
     "no-multi-spaces": 2,
