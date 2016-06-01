@@ -1,0 +1,68 @@
+#!/usr/bin/env node
+'use strict';
+
+require('dotenv').config({silent: true});
+const spawn = require('child_process').spawn;
+const path = require('path');
+const hubotArgs = [
+	'--name', 'ft'
+];
+
+// Detect adapter
+let adapter = 'shell';
+
+if (process.env.HUBOT_SLACK_TOKEN) {
+	if (adapter !== 'shell') throw Error('Ambiguous environment');
+	adapter = 'slack';
+}
+
+if (process.env.HUBOT_YAMMER_KEY) {
+	if (adapter !== 'shell') throw Error('Ambiguous environment');
+	adapter = 'yammer';
+}
+
+if (process.env.HUBOT_CAMPFIRE_ACCOUNT) {
+	if (adapter !== 'shell') throw Error('Ambiguous environment');
+	adapter = 'campfire';
+}
+
+if (process.env.HUBOT_GTALK_USERNAME) {
+	if (adapter !== 'shell') throw Error('Ambiguous environment');
+	adapter = 'gtalk';
+}
+
+if (process.env.HUBOT_WEB_ENDPOINTS) {
+	if (adapter !== 'shell') throw Error('Ambiguous environment');
+	adapter = 'mock-adapter';
+}
+
+if (adapter === 'shell') {
+	console.log('falling back to shell');
+} else {
+	console.log('environment ' + adapter + ' detected.');
+	hubotArgs.unshift("--adapter", adapter);
+}
+
+console.log('hubot arguments: ', hubotArgs);
+
+if (!process.env.PORT) {
+	process.env.PORT = 3001;
+}
+
+process.env.EXPRESS_PORT = Number(process.env.PORT) + 1;
+
+process.env.PATH = "node_modules/.bin:node_modules/hubot/node_modules/.bin:" + process.env.PATH;
+var child = spawn(path.join(__dirname, '../node_modules/.bin/hubot'), hubotArgs, {
+	cwd: path.join(__dirname, '..')
+});
+
+child.stdout.pipe(process.stdout);
+child.stderr.pipe(process.stdout);
+if (adapter === 'shell') process.stdin.pipe(child.stdin);
+
+child.on('exit', function () {
+	console.log('Exit');
+});
+child.on('error', function (e) {
+	console.log('Error', e);
+});

@@ -1,0 +1,36 @@
+{
+  "name": "FT-Chatbot",
+  "version": "0.0.0",
+  "private": true,
+  "author": "FT Labs",
+  "scripts": {
+    "start": "./bin/hubot"
+  },
+  "description": "FT Chatbot",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "dotenv": "^2.0.0",
+    "express-handlebars": "^3.0.0",
+    "handlebars": "^4.0.5",
+    "hiredis": "^0.4.1",
+    "hubot": "^2.19.0",
+    "hubot-diagnostics": "0.0.1",
+    "hubot-gtalk": "^2.0.2",
+    "hubot-help": "^0.2.0",
+    "hubot-heroku-keepalive": "1.0.2",
+    "hubot-mock-adapter": "^1.0.0",
+    "hubot-redis-brain": "0.0.3",
+    "hubot-slack": "^3.4.2",
+    "hubot-yammer": "0.2.0",
+    "lodash": "^4.13.1",
+    "moment": "^2.13.0",
+    "redis": "^2.6.0-2",
+    "request-promise": "^3.0.0",
+    "socket.io": "^1.4.6",
+    "uniq": "^1.0.1",
+    "ws": "^1.1.0"
+  },
+  "engines": {
+    "node": "6.0.0"
+  }
+}
