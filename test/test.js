@@ -5,6 +5,8 @@ const co = require('co');
 const Helper = require('hubot-test-helper')
 const helper = new Helper('../scripts');
 
+require('dotenv').config({silent: true});
+
 describe("Replies when requesting help", function() {
 	let room;
 
