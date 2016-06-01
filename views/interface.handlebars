@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html class=no-js>
+	<head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+		<link rel="stylesheet" href="https://build.origami.ft.com/v2/bundles/css?modules=o-fonts%402.1.2%2Co-colors%403.3.2%2Co-footer%403.2.3%2Co-grid%403.2.6%2Co-ft-icons%402.4.1%2Co-buttons%402.0.4%2Co-forms%401.0.3%2Co-autoinit%401.2.0&shrinkwrap=o-assets%402.0.0%2Co-hoverable%401.2.0%2Csass-mq%403.2.9" />
+		<script src="//build.origami.ft.com/bundles/js?modules=o-grid@^3.1.4,jquery,o-date@^1.1.1"></script>
+		<title>Chatbot</title>
+		<style>
+			body, html {
+				font-family: BentonSans, helvetica, sans;
+				margin: 0;
+				min-height: 100%;
+			}
+
+			.o-header__logo {
+				font-size: 2.4em;
+			}
+
+			.header-text {
+				padding-left: 1em;
+			}
+
+			.chat-message:nth-child(odd) {
+				background: rgba(0, 0, 0, 0.05);
+			}
+
+			.chat-messages {
+				padding: 1em 0;
+			}
+
+			.chat-message {
+				display: block;
+				text-decoration: none;
+				color: inherit;
+			}
+
+			.chat-message:focus,
+			.chat-message:active {
+				font-size: 0;
+			}
+
+			.chat-message:focus:after,
+			.chat-message:active:after {
+				content: attr(title);
+				white-space: pre-wrap;
+				font-size: 12pt;
+			}
+
+			.chat-message > p {
+				margin: 0;
+				padding: 0.5em;
+				white-space: pre-wrap;
+			}
+
+
+			.chat-message_date {
+				float: right;
+			}
+
+			.chat-message_response {
+				font-size: 80%;
+				padding: 0 0 0 1em;
+			}
+
+			#message-input-box {
+				width: 100%;
+			}
+
+			#send-message {
+				width: 100%
+			}
+
+			[data-o-grid-colspan] {
+				padding-left: 0;
+				padding-right: 0;
+			}
+
+			.connection-state:after {
+				background-color: rgba(255,255,255,0.1);
+				padding: 0.2em;
+				border-radius: 0.2em;
+				margin-top: -0.2em;
+				border: 1px solid rgba(255, 255, 255, 0.3);
+				float: right;
+			}
+
+			pre {
+				display: inline;
+			}
+
+			.connection-state_closed:after { content: 'Reconnecting'; }
+			.connection-state_connecting:after { content: 'Connecting'; }
+			.connection-state_closing:after { content: 'Closing'; float: }
+			.connection-state_open:after { content: 'Connected'; }
+			.connection-state_disco:after { content: 'Disconnected, toggle to reconnect.'; }
+		</style>
+	</head>
+	<body class="o-colors-page-background o-colors-body-text ">
+		<header data-o-component="o-header" class="o-header">
+			<div class="o-header__container">
+				<div class="o-header__inner">
+					<div class="o-header__primary ">
+						<div class="o-header__logo">
+							<i class="o-ft-icons-icon o-ft-icons-icon--brand-ft"></i>
+						</div>
+						<span class="header-text">Chatbot Demo</span>
+					</div>
+					<div class="o-header__secondary">
+						<h3>Interactive chatbot<span class="connection-state"></span></h3>
+					</div>
+				</div>
+			</div>
+		</header>
+{{^errorMessage}}
+		<div class="o-grid-row">
+			<div class="intro"  data-o-grid-colspan="center 12 S10 M10 L10 XL6">
+				<p><button id="remove-intro">HIDE INTRO</button></p>
+				<h3>Information:</h3>
+				<p>At the bottom of this page is an interactive demo. Click on each message to view the object used to generate it, objects from <em>[user]</em> are what are sent to the server, objects from <em>ft</em> are what the server sends down.</p>
+				<h3>API:</h3>
+				<p>In order to run the server to run the web endpoints it needs to be run with the <pre>HUBOT_WEB_ENDPOINTS=1</pre> enviroment variable and not run any other adapter.</p>
+				<p>Connect to the socket server in this case <pre><script>
+					var socketServer = "ws://" + location.host;
+					document.write(socketServer);
+				</script></pre>
+				<p>Send the stringified objects to the server, the server will reply on the same websocket</p>
+				<p>Send this to the server: <br /><pre>
+	{
+	  type: "wss-hook_incoming-message" <-- WebSocket action
+	  userId                            <-- unique userId (persist?)
+	  messageId                         <-- unique id probable based on timestamp and user id
+	  name                              <-- friendly name
+	  text                              <-- message text
+	}</pre></p><p>You'll getthis back: <br /><pre>
+	{
+	  type: "wss-hook_outgoing-message" <-- indicating it is a reply from ther server
+	  id                                <-- message the bot was replying to
+	  text:                             <-- the reply from the bot
+	  timestamp:                        <-- server time of reply
+	}</pre></p>
+	<p>There is also a heartbeat <pre>{ heartbeat: N }</pre> which can be used to ensure that the websocket is still connected</p>
+			</div>
+		</div>
+		<div class="o-grid-row">
+			<div class="chat-messages" data-o-grid-colspan="center 12 M10 L9 XL8">
+			</div>
+			<span data-o-grid-colspan="center 12 M10 L9 XL8">
+				<span data-o-grid-colspan="9" class="no-padding">
+					<input type="text" placeholder="Message to send to hubot" id="message-input-box" />
+				</span>
+				<span data-o-grid-colspan="3" class="no-padding">
+					<button id="send-message">Send</button>
+				</span>
+			</span>
+		</div>
+{{/errorMessage}}
+{{#if errorMessage}}
+	<div class="o-grid-row">
+		<h3>Error {{{errorMessage}}}</h3>
+	</div>
+{{/if}}
+		<footer class="o-footer" data-o-component="o-footer">
+			<div class="o-footer__pearson">
+				<div class="o-footer__row">
+					<div class="o-footer__col o-footer__col--full-width">
+						<div class="o-footer__pearson-tagline" aria-label="Always Learning"></div>
+						<div class="o-footer__pearson-logo" aria-label="Pearson"></div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		<div class="notification-box" data-o-grid-colspan="12 S10 M8 L8 XL4">
+		</div>
+		<script>
+			var $ = window.Origami.jquery;
+			var reconnectAttempts = 0;
+			var reconnectAttemptsResetTimeoutId;
+
+			var entityMap = {
+				"&": "&amp;",
+				"<": "&lt;",
+				">": "&gt;",
+				'"': '&quot;',
+				"'": '&#39;',
+				"/": '&#x2F;'
+			};
+
+			function escapeHtml(string) {
+				return String(string).replace(/[&<>"'\/]/g, function (s) {
+					return entityMap[s];
+				});
+			}
+
+			function FTHubotWSAPI(url, name) {
+				var intervalID;
+				var socket;
+				var missedHeartbeats = 0;
+				var connectionStateDOM;
+				var self = this;
+
+				function connect() {
+					socket = new WebSocket(url);
+					self.ws = socket;
+					socket.onerror = function () {};
+					clearTimeout(reconnectAttemptsResetTimeoutId);
+
+					if (reconnectAttempts >= 5) {
+						connectionStateDOM.classList.add('connection-state_disco');
+						return;
+					}
+					reconnectAttempts++;
+
+					console.log('Creating new socket');
+
+					socket.addEventListener('message', function (event) {
+						var query = JSON.parse(event.data);
+						if (query.type === "wss-hook_outgoing-message") {
+							appendMessage(query, 'ft');
+						}
+						if (query.heartbeat) {
+							console.log("badum");
+							missedHeartbeats = 0;
+						}
+					});
+
+					socket.addEventListener('open', function () {
+
+						// if it stays connected for 30 seconds reset time failure counter
+						reconnectAttemptsResetTimeoutId = setTimeout(function () {
+							console.log('Connection seems stable resetting connection attempts counter');
+							reconnectAttempts = 0;
+						}, 15000);
+
+						console.log("Connected");
+						connectionStateDOM.classList.remove('connection-state_disco');
+					});
+
+					intervalID = setInterval(checkStatus, 1000);
+				}
+
+				function checkStatus() {
+					switch(socket.readyState) {
+						case socket.OPEN:
+							if (missedHeartbeats >= 3) {
+								console.log('Missed too many heartbeats, resuscitating.');
+								teardown();
+								connect();
+							}
+							missedHeartbeats++;
+							connectionStateDOM.classList.remove('connection-state_disco');
+							connectionStateDOM.classList.remove('connection-state_closed');
+							connectionStateDOM.classList.remove('connection-state_connecting');
+							connectionStateDOM.classList.remove('connection-state_closing');
+							connectionStateDOM.classList.add('connection-state_open');
+							break;
+						case socket.CLOSED:
+							connectionStateDOM.classList.add('connection-state_closed');
+							connectionStateDOM.classList.remove('connection-state_connecting');
+							connectionStateDOM.classList.remove('connection-state_closing');
+							connectionStateDOM.classList.remove('connection-state_open');
+							teardown();
+							connect();
+							break;
+						case socket.CONNECTING:
+							connectionStateDOM.classList.remove('connection-state_closed');
+							connectionStateDOM.classList.add('connection-state_connecting');
+							connectionStateDOM.classList.remove('connection-state_closing');
+							connectionStateDOM.classList.remove('connection-state_open');
+							break;
+						case socket.CLOSING:
+							connectionStateDOM.classList.remove('connection-state_closed');
+							connectionStateDOM.classList.remove('connection-state_connecting');
+							connectionStateDOM.classList.add('connection-state_closing');
+							connectionStateDOM.classList.remove('connection-state_open');
+							break;
+					}
+				}
+
+				function appendMessage(data, from) {
+					/**
+					 * An object is sent back from the server
+					 * these are its properties:
+					 *
+					 * type: command what to do from the server
+					 * id: message the bot was replying to
+					 * text: the reply from the bot
+					 * timestamp: server time of reply
+					 */
+					$("<a class='chat-message' href='javascript:void(0)' title='"+escapeHtml(JSON.stringify(data, null, "  "))+"'>"+'<p><b>'+from+': </b>'+ escapeHtml(data.text) +'<time data-o-component="o-date" class="o-date chat-message_date" datetime="' + data.timestamp + '">' + data.timestamp + '</time></p></a>')
+						.appendTo('.chat-messages');
+				}
+
+				function manualReconnect() {
+					teardown();
+					reconnectAttempts = 0;
+					connectionStateDOM.classList.remove('connection-state_disco');
+					connect();
+				}
+
+				function teardown() {
+					console.log('Destroying socket.');
+					socket.close();
+					clearTimeout(intervalID);
+					clearTimeout(reconnectAttemptsResetTimeoutId);
+					connectionStateDOM.classList.add('connection-state_disco');
+				}
+
+				var userId = name + "_" + Date.now();
+				function sendMessage(string) {
+					/**
+					 * description:
+					 * type: "wss-hook_incoming-message" <-- WebSocket action
+					 * userId                            <-- unique userId (persist?)
+					 * messageId                         <-- unique id probable based on timestamp and user id
+					 * name                              <-- friendly name
+					 * text                              <-- message text
+					 */
+					var message = {
+						type: "wss-hook_incoming-message",
+						userId: userId,
+						messageId: Date.now(),
+						name: name,
+						text: string,
+
+						// this parameter is to add the timestamp to
+						// the local display it is not needed for the api call
+						timestamp: new Date().toISOString()
+					};
+					socket.send(JSON.stringify(message));
+					appendMessage(message, name);
+				}
+
+				connect();
+
+				connectionStateDOM = document.querySelector('.connection-state');
+
+				connectionStateDOM.addEventListener('click', function () {
+					if (socket.readyState === socket.CLOSED) {
+						manualReconnect();
+					} else {
+						teardown();
+					}
+				});
+
+				this.reconnect = manualReconnect;
+				this.teardown = teardown;
+				this.ws = socket;
+				this.sendMessage = sendMessage;
+			}
+
+			var messageApi = new FTHubotWSAPI(socketServer, "Ada");
+			messageApi.ws.addEventListener('open', function () {
+				messageApi.sendMessage('hi');
+			});
+
+
+			var textEntry = document.querySelector('#message-input-box');
+			var submitButton = document.querySelector('#send-message');
+			var removeButton = document.querySelector('#remove-intro');
+
+			submitButton.addEventListener('click', function () {
+				messageApi.sendMessage($(textEntry).val());
+				textEntry.value = "";
+			});
+			textEntry.addEventListener('keyup', function (e) {
+				if (e.keyCode === 13) {
+					messageApi.sendMessage($(textEntry).val());
+					textEntry.value = "";
+				}
+			});
+			removeButton.addEventListener('click', function () {
+				$('.intro').remove();
+			});
+		</script>
+	</body>
+</html>

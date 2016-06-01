@@ -1,0 +1,9 @@
+<div class="logitem" data-commentid="{{commentId}}">
+	<p>
+		{{#fulfilled}}✓{{/fulfilled}}{{^fulfilled}}✗{{/fulfilled}}
+		<b>({{adapter}}) {{#user}}{{name}}{{/user}}:</b> {{{message}}} <time data-o-component="o-date" class="o-date logitem_date" datetime="{{robotTime}}">{{humanTime}}</time>
+		{{#if response}}
+			<div class="logitem_response">{{{response}}}</div>
+		{{/if}}
+	</p>
+</div>

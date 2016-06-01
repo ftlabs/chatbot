@@ -1,0 +1,10 @@
+node_modules
+.DS_Store*
+.hubot_history
+npm-debug.log
+yammer-conf.json
+yammer-local.sh
+Vagrantfile
+.vagrant
+.env
+temp

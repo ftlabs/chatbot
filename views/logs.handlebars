@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class=no-js>
+	<head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="https://build.origami.ft.com/v2/bundles/css?modules=o-fonts%402.1.2%2Co-colors%403.3.2%2Co-footer%403.2.3%2Co-grid%403.2.6%2Co-ft-icons%402.4.1%2Co-buttons%402.0.4%2Co-forms%401.0.3%2Co-autoinit%401.2.0&shrinkwrap=o-assets%402.0.0%2Co-hoverable%401.2.0%2Csass-mq%403.2.9" />
+		<script src="//build.origami.ft.com/bundles/js?modules=o-grid@^3.1.4,jquery,o-date@^1.1.1"></script>
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<title>Chatbot</title>
+		<style>
+			body, html {
+				font-family: BentonSans, helvetica, sans;
+				margin: 0;
+				min-height: 100%;
+			}
+
+			.feed_wrapper {
+				padding: 0 1em;
+			}
+
+			.o-header__logo {
+				font-size: 2.4em;
+			}
+
+			.text-center {
+				text-align: center;
+			}
+
+			.header-text {
+				padding-left: 1em;
+			}
+
+			.notification-box {
+				position: fixed;
+				top: 0;
+				right: 0;
+			}
+
+			.notification {
+				background-color: white;
+				border: lightgray 1px solid;
+				padding: 0 1em 1em 1em;
+				border-radius: 1em;
+				box-shadow: 0 0 1em black;
+				margin: 0.6em;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.notification .progress-indicator {
+				height: 0.25em;
+				border-radius: 0 0 1em 1em;
+				width: 100%;
+				background-color: rgb(81, 169, 255);
+				display: none;
+				box-sizing: border-box;
+			}
+
+			.notification .progress-indicator.descend-fast {
+				display: block;
+				animation-name: shrink;
+				animation-timing-function: linear;
+				animation-duration: 10s;
+			}
+
+			.notification .progress-indicator.descend-slow {
+				display: block;
+				animation-name: shrink;
+				animation-timing-function: linear;
+				animation-duration: 60s;
+			}
+
+			@-webkit-keyframes shrink {
+				0% {transform: scaleX(1);}
+				100% {transform: scaleX(0);}
+			}
+
+			@keyframes shrink {
+				0% {transform: scaleX(1);}
+				100% {transform: scaleX(0);}
+			}
+
+
+			.pretty-text-input {
+				display: block;
+				margin: 0.5em -0.5em;
+				width: 100%;
+				height: 100px;
+				font-family: BentonSans, helvetica, sans;
+				font-size: 18px;
+				appearance: none;
+				box-shadow: none;
+				border-radius: none;
+				padding: 10px;
+				border: solid 1px #dcdcdc;
+				transition: box-shadow 0.3s, border 0.3s;
+			}
+
+			.pretty-text-input:focus {
+				border: solid 1px #707070;
+				box-shadow: 0 0 5px 1px #969696;
+			}
+
+			.pretty-button {
+				font-family: BentonSans, helvetica, sans;
+				font-size: 18px;
+			}
+
+			.logitem:nth-child(odd) {
+				background: rgba(0, 0, 0, 0.05);
+			}
+
+			.logitem > p {
+				margin: 0;
+				padding: 0.5em;
+			}
+
+			.logitem_date {
+				float: right;
+			}
+
+			.logitem_response {
+				font-size: 80%;
+				padding: 0 0 0 1em;
+			}
+
+			.api-souce_row {
+				display: block;
+				margin: 0.25em;
+			}
+
+			.api-souce_row:nth-child(odd) {
+				background: rgba(0, 0, 0, 0.05);
+			}
+
+			#connection-toggle-target {
+				margin-bottom: 2em;
+			}
+
+			.api-source_new-entry button {
+				float: right;
+				margin: 0.25em;
+			}
+
+			.api-source_new-entry input {
+				width: 30em;
+				max-width: 100%;
+				margin: 0.25em;
+			}
+
+			.api-source_remove-button {
+				float: right;
+				margin-left: 0.25em;
+			}
+
+			.connection-state_closed:after { content: 'Reconnecting'; float: right; }
+			.connection-state_connecting:after { content: 'Connecting'; float: right; }
+			.connection-state_closing:after { content: 'Closing'; float: right; }
+			.connection-state_open:after { content: 'Connected'; float: right; }
+			.connection-state_disco:after { content: 'Disconnected, toggle to reconnect.'; float: right; }
+		</style>
+	</head>
+	<body class="o-colors-page-background o-colors-body-text ">
+		<header data-o-component="o-header" class="o-header">
+			<div class="o-header__container">
+				<div class="o-header__inner">
+					<div class="o-header__primary ">
+						<div class="o-header__logo">
+							<i class="o-ft-icons-icon o-ft-icons-icon--brand-ft"></i>
+						</div>
+						<span class="header-text">Chatbot Logs</span>
+					</div>
+					<div class="o-header__secondary">
+						<h3>Latest Chat Queries</h3>
+					</div>
+				</div>
+			</div>
+		</header>
+{{^errorMessage}}
+		<div class="o-grid-row feed_wrapper feed_wrapper-unrevealed">
+			<div class="intro">
+				<h3>Bot Queries</h3>
+				<div id="connection-toggle-target" data-o-grid-colspan="center 12 M10 L9 XL8">
+					<span class="api-souce_row"><label class="api-source_checkbox"><input type="checkbox" checked="false"  id="disable-responding">Use operator interjection, when a command has not been undestood.</label></span>
+					<span class="api-souce_row api-source_new-entry"><input type="text" placeholder="New API Endpoint" /><button id="new-endpoint-btn">Add new endpoint</button></span>
+				</div>
+			</div>
+			<div class="logs" data-o-grid-colspan="center 12 M10 L9 XL8">
+				{{#logs}}{{>log}}{{/logs}}
+			</div>
+		</div>
+{{/errorMessage}}
+{{#if errorMessage}}
+	<div class="o-grid-row">
+		<h3>Error {{{errorMessage}}}</h3>
+	</div>
+{{/if}}
+		<footer class="o-footer" data-o-component="o-footer">
+			<div class="o-footer__pearson">
+				<div class="o-footer__row">
+					<div class="o-footer__col o-footer__col--full-width">
+						<div class="o-footer__pearson-tagline" aria-label="Always Learning"></div>
+						<div class="o-footer__pearson-logo" aria-label="Pearson"></div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		<div class="notification-box" data-o-grid-colspan="12 S10 M8 L8 XL4">
+		</div>
+		<script>
+			var $ = window.Origami.jquery;
+			var apiEndpoints = [];
+
+			// handlebars {{#each websocketApiLocations}}
+			apiEndpoints.push("{{ this }}");
+			// handlebars {{/each}}
+
+			// Backwards compat
+			apiEndpoints = apiEndpoints.map(function(host) {
+				return host.replace(/^(?:\w*\:\/\/)?([^\/]+(\:\d+)?).*?$/, "$1");
+			});
+
+
+			var entityMap = {
+				"&": "&amp;",
+				"<": "&lt;",
+				">": "&gt;",
+				'"': '&quot;',
+				"'": '&#39;',
+				"/": '&#x2F;'
+			};
+
+			function escapeHtml(string) {
+				return String(string).replace(/[&<>"'\/]/g, function (s) {
+					return entityMap[s];
+				});
+			}
+
+			function FTHubotWSAPI(host) {
+				var intervalID;
+				var socket;
+				var missedHeartbeats = 0;
+				var connectionStateDOM;
+				var listenToggle;
+				var listenToggleCheckbox;
+				var isResponding = false;
+				var connectPending = true;
+				var self = this;
+
+				function connect() {
+
+					connectPending = true;
+
+					if (socket) {
+						teardown();
+						socket.connect();
+					} else {
+						socket = io(host);
+						socket.onerror = function () {};
+						socket.on('connect', function () {
+							console.log("Socket connected to "+host);
+						});
+
+						socket.on('log', function (data) {
+							prependMessage(data);
+							if (!data.fulfilled && isResponding) {
+								promptForResponse(data);
+							}
+						});
+						socket.on('operatorTimeout', function(data) {
+							document.dispatchEvent(new CustomEvent('chatbot-response-id-arrived', {detail: data}));
+						});
+						socket.on('heartbeat', function() {
+							missedHeartbeats = 0;
+							if (connectPending) {
+								console.log("Receiving heartbeat from "+host);
+								connectionStateDOM.classList.remove('connection-state_disco');
+								if (!listenToggleCheckbox.checked) {
+									listenToggleCheckbox.checked = true;
+								}
+								startResponding();
+								connectPending = false;
+							}
+						});
+					}
+
+					connectionStateDOM.classList.remove('connection-state_disco');
+					console.log('Connecting to '+host, socket);
+
+					intervalID = setInterval(function () {
+						switch(socket.io.readyState) {
+							case "open":
+								if (missedHeartbeats >= 3) {
+									console.log(host+ ' missed too many heartbeats, resuscitating.');
+									connect();
+								}
+								missedHeartbeats++;
+								connectionStateDOM.classList.remove('connection-state_disco');
+								if (!listenToggleCheckbox.checked) {
+									listenToggleCheckbox.checked = true;
+								}
+								connectionStateDOM.classList.remove('connection-state_closed');
+								connectionStateDOM.classList.remove('connection-state_connecting');
+								connectionStateDOM.classList.remove('connection-state_closing');
+								connectionStateDOM.classList.add('connection-state_open');
+								break;
+							case "closed":
+								connectionStateDOM.classList.add('connection-state_closed');
+								connectionStateDOM.classList.remove('connection-state_connecting');
+								connectionStateDOM.classList.remove('connection-state_closing');
+								connectionStateDOM.classList.remove('connection-state_open');
+								break;
+							case "connecting":
+								connectionStateDOM.classList.remove('connection-state_closed');
+								connectionStateDOM.classList.add('connection-state_connecting');
+								connectionStateDOM.classList.remove('connection-state_closing');
+								connectionStateDOM.classList.remove('connection-state_open');
+								break;
+							case "closing":
+								connectionStateDOM.classList.remove('connection-state_closed');
+								connectionStateDOM.classList.remove('connection-state_connecting');
+								connectionStateDOM.classList.add('connection-state_closing');
+								connectionStateDOM.classList.remove('connection-state_open');
+								break;
+						}
+					}, 1000);
+				}
+
+				function promptForResponse(message) {
+					var notification = document.createElement('div');
+					notification.classList.add('notification');
+					notification.innerHTML = [
+						'<div class="progress-indicator descend-fast" data-pc="100%"></div>',
+						'<h3>Unmatched query from ' + escapeHtml(message.user.name) + '</h3>',
+						'<p>' + escapeHtml(message.message) + '</p>',
+						'<textarea class="new-response pretty-text-input" name="message" data-messageid="'+(message.commentId)+'">',
+						message.response,
+						'</textarea>',
+						'<button data-commentid="'+(message.commentId)+'" class="cancel pretty-button">Cancel</button>',
+						'<button data-commentid="'+(message.commentId)+'" class="submit pretty-button">Submit</button>'
+					].join("");
+
+					function submit() {
+						socket.emit('replacementResponse', {
+							commentId: message.commentId,
+							newResponse: notification.querySelector('.new-response').value
+						});
+						hideNotification();
+					}
+
+					function cancel() {
+						socket.emit('cancelIntervention', {
+							commentId: message.commentId
+						});
+						hideNotification();
+					}
+
+					function focus() {
+						var progressIndicator = notification.querySelector('.progress-indicator');
+						progressIndicator.classList.remove('descend-fast');
+						setTimeout(function () {
+							progressIndicator.classList.add('descend-slow');
+						}, 10);
+
+						socket.emit('operatorStartEditing', {
+							commentId: message.commentId
+						});
+					}
+
+					function testThenCancel(e) {
+						if (e.detail.commentId === message.commentId) hideNotification();
+					}
+
+					function hideNotification() {
+						notification.querySelector('.submit').removeEventListener('click', submit);
+						notification.querySelector('.cancel').removeEventListener('click', cancel);
+						notification.querySelector('.new-response').removeEventListener('focus', focus);
+						document.removeEventListener('chatbot-disco', cancel);
+						document.removeEventListener('chatbot-response-id-arrived', testThenCancel);
+
+						$(notification).hide(200, function () {
+							$(notification).remove();
+						});
+					}
+
+					notification.querySelector('.submit').addEventListener('click', submit);
+					notification.querySelector('.cancel').addEventListener('click', cancel);
+					notification.querySelector('.new-response').addEventListener('focus', focus);
+					document.addEventListener('chatbot-disco', cancel);
+					document.addEventListener('chatbot-response-id-arrived', testThenCancel);
+
+					document.querySelector('.notification-box').appendChild(notification);
+
+				} // /PromptForResponse
+
+				function prependMessage(data) {
+					if (data.htmlEncoded) {
+
+						// Remove stale entry
+						$('.logs > .logitem[data-commentid="' + data.commentId + '"]').remove();
+
+						// Notify new entry
+						document.dispatchEvent(new CustomEvent('chatbot-response-id-arrived', {detail: data}));
+
+						$(data.htmlEncoded).prependTo('.logs');
+					}
+				}
+
+				function teardown() {
+					console.log('Disconnecting '+host);
+					socket.disconnect();
+					clearTimeout(intervalID);
+					document.dispatchEvent(new Event('chatbot-disco'));
+					connectionStateDOM.classList.add('connection-state_disco');
+				}
+
+				function removeEntry() {
+					socket.emit('removeEndpoint', {
+						endpoint: host
+					});
+					teardown();
+					listenToggle.remove();
+				}
+
+				function stopResponding() {
+					isResponding = false;
+					console.log('Turning off operator intervention for '+host);
+					socket.emit('stopResponding');
+				}
+
+				function startResponding() {
+					isResponding = true;
+					console.log('Turning ON operator intervention for '+host);
+					socket.emit('startResponding');
+				}
+
+				listenToggle = $('<span class="api-souce_row"><label class="api-source_checkbox"><input type="checkbox" checked="true">' + host + '</label><button class="api-source_remove-button">Remove</button></span>');
+				$('#connection-toggle-target').prepend(listenToggle);
+				listenToggleCheckbox = listenToggle[0].querySelector('input');
+				listenToggle[0].querySelector('.api-source_remove-button').addEventListener('click', removeEntry);
+
+				listenToggleCheckbox.addEventListener('change', function () {
+					setTimeout(function() {
+						if (listenToggleCheckbox.checked) {
+							connect();
+						} else {
+							teardown();
+						}
+					}, 10);
+				});
+
+				connectionStateDOM = listenToggle[0];
+
+				this.stopResponding = stopResponding;
+				this.startResponding = startResponding;
+
+				connect();
+			}
+
+			document.getElementById('new-endpoint-btn').addEventListener('click', function () {
+				var host = $('.api-source_new-entry input').val();
+				if (apiEndpoints.indexOf(host.toLowerCase()) === -1) {
+					apiConns.push(new FTHubotWSAPI(host.toLowerCase()));
+				}
+			});
+
+			document.getElementById('disable-responding').addEventListener('change', function () {
+				apiConns.forEach(function (apiConn) {
+					if (!document.getElementById('disable-responding').checked) {
+						apiConn.stopResponding();
+					} else {
+						apiConn.startResponding();
+					}
+				});
+			});
+
+			// See if current page is in the endpoints list. If not, add it (local dev)
+			if (apiEndpoints.indexOf(location.host) === -1) {
+				apiEndpoints.push(location.host);
+			}
+
+			// Connect to all of the endpoints in the endpoint list
+			var apiConns = apiEndpoints.map(function (host) {
+				return new FTHubotWSAPI(host);
+			});
+		</script>
+	</body>
+</html>

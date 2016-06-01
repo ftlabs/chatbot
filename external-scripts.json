@@ -1,0 +1,4 @@
+[
+	"hubot-heroku-keepalive",
+	"hubot-redis-brain"
+]

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class=no-js>
+	<head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+		<link rel="stylesheet" href="https://origami-build.ft.com/v2/bundles/css?modules=o-fonts%402.1.2%2Co-colors%403.3.2%2Co-footer%403.2.3%2Co-grid%403.2.6%2Co-ft-icons%402.4.1%2Co-buttons%402.0.4%2Co-forms%401.0.3%2Co-autoinit%401.2.0&shrinkwrap=o-assets%402.0.0%2Co-hoverable%401.2.0%2Csass-mq%403.2.9" />
+		<script src="http://origami-build.ft.com/v2/bundles/js?modules=o-grid@^3.1.4,jquery,o-date@^1.1.1"></script>
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<title>FT Chatbot embeddable widget</title>
+		<style>
+			body, html {
+				font-family: BentonSans, helvetica, sans-serif;
+				margin: 0;
+				height: 100%;
+				min-height: 100%;
+				display: -webkit-flex;
+				display: flex;
+				overflow: hidden;
+				-webkit-flex-direction: column;
+				flex-direction: column;
+			}
+
+			.messages {
+				-webkit-flex: 1 0 auto;
+				flex: 1 0 auto;
+				position: relative;
+				margin: 10px;
+			}
+			.interface {
+				-webkit-flex: 0 0 auto;
+				flex: 0 0 auto;
+				margin: 10px;
+				display: -webkit-flex;
+				display: flex;
+			}
+
+			.chat-messages {
+				overflow: auto;
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				box-sizing: border-box;
+			}
+
+			.chat-message:nth-child(odd) {
+				background: rgba(0, 0, 0, 0.05);
+			}
+
+			.chat-message {
+				margin: 0;
+				padding: 0.5em;
+				white-space: pre-wrap;
+			}
+
+			.chat-message_date {
+				float: right;
+				font-size: 12px;
+				color: #008000;
+				margin-top: 3px;
+				opacity: 0.2;
+				transition: opacity 0.3s ease;
+			}
+			.chat-message:hover .chat-message_date {
+				opacity: 1;
+			}
+
+			#message-input-box {
+				-webkit-flex: 1 0 auto;
+				flex: 1 0 auto;
+				width: auto;
+				padding: 5px 10px;
+				font-size: 15px;
+				box-sizing: border-box;
+			}
+
+			#send-message {
+				-webkit-flex: 0.1 0 auto;
+				flex: 0.1 0 auto;
+				margin-left: 10px;
+			}
+
+			.errorbar {
+				position: absolute;
+				z-index: 2;
+				top: 0;
+				left: 0;
+				width: 100%;
+				box-sizing: border-box;
+				padding: 5px;
+				font-size: 13px;
+				background: #333;
+				color: white;
+				font-weight: bold;
+				margin-top: -100%;
+				transition: margin-top 0.3s ease;
+			}
+			.errorbar-visible {
+				margin-top: 0;
+			}
+
+		</style>
+	</head>
+	<body class="o-colors-page-background o-colors-body-text">
+		<div class='errorbar' id='errorbar'></div>
+		<section class='messages'>
+			<div class="chat-messages"></div>
+		</section>
+		<section class='interface'>
+			<input type="text" placeholder="Type your message here" id="message-input-box" class='o-forms-text' />
+			<button id="send-message" class='o-buttons o-buttons--big'>Send</button>
+		</section>
+		<script>
+			var $ = window.Origami.jquery;
+
+			var $textEntry = $('#message-input-box');
+			var $submitButton = $('#send-message');
+			var $messageList = $('.chat-messages');
+			var $errorBar = $('#errorbar');
+			var alertTimeout;
+
+			function escapeHtml(string) {
+				var entityMap = {
+					"&": "&amp;",
+					"<": "&lt;",
+					">": "&gt;",
+					'"': '&quot;',
+					"'": '&#39;',
+					"/": '&#x2F;'
+				};
+				return String(string).replace(/[&<>"'\/]/g, function (s) {
+					return entityMap[s];
+				});
+			}
+
+			// Use the post message interface to send
+			// messages about the chatbot status to the
+			// parent window.
+			function informParentWindow(eventType) {
+				if (parent && parent.postMessage) {
+
+					// Send a stringified object because a
+					// few browsers can only post strings.
+					parent.postMessage(JSON.stringify({
+						source: 'chatbot',
+						event: eventType
+					}), "*");
+				}
+			}
+
+			function alertMsg(str, timeout) {
+				if (str) {
+					$errorBar.html(str).addClass('errorbar-visible');
+				} else {
+					$errorBar.removeClass('errorbar-visible');
+				}
+				clearTimeout(alertTimeout);
+				if (timeout) alertTimeout = setTimeout(alertMsg, timeout);
+			}
+
+			function FTHubotWSAPI(name) {
+				var intervalID;
+				var socket;
+				var ticksSinceHeartbeat = 0;
+				var self = this;
+				var userId = name + "_" + Date.now();
+
+				function connect() {
+
+					if (socket) {
+						console.log('Destroying existing socket.');
+						informParentWindow('disconnected');
+						socket.disconnect();
+						clearTimeout(intervalID);
+					} else {
+	 					socket = io();
+	 				}
+
+					alertMsg('Connecting');
+					informParentWindow('connecting');
+
+					socket.on('message', function (data) {
+						appendMessage(data, 'FT');
+					});
+
+					socket.on('heartbeat', function() { ticksSinceHeartbeat = 0; });
+
+					socket.on('connect', function () {
+						alertMsg('Connected', 1000);
+						informParentWindow('connected');
+						if ($messageList.find('.chat-message').length === 0) {
+							sendMessage('Hi!');
+						}
+					});
+
+					intervalID = setInterval(checkStatus, 1000);
+				}
+
+				function checkStatus() {
+					if (socket.connected) {
+						if (ticksSinceHeartbeat >= 3) {
+							connect();
+						}
+					} else {
+						alertMsg('Still connecting');
+					}
+				}
+
+				function appendMessage(data, from) {
+					/**
+					 * An object is sent back from the server
+					 * these are its properties:
+					 *
+					 * type: command what to do from the server
+					 * id: message the bot was replying to
+					 * text: the reply from the bot
+					 * timestamp: server time of reply
+					 */
+
+					var html = escapeHtml(data.text);
+					html = html.replace(/`(.*)`/g, '<code>$1</code>');
+
+					$messageList.append('<p class="chat-message"><time data-o-component="o-date" class="o-date chat-message_date" datetime="' + data.timestamp + '">' + data.timestamp + '</time><b>'+from+': </b>'+ html+'</p>').get(0).scrollTop = 9999999;
+
+					// o-date ought to deal with new elements being added to the page!
+					Origami['o-date'].init();
+				}
+
+				/**
+				 * userId      <-- unique userId (persist?)
+				 * name        <-- user name
+				 * messageId   <-- unique id based on timestamp and user id
+				 * text        <-- message text
+				 */
+				function sendMessage(string) {
+					var message = {
+						userId: userId,
+						messageId: userId + '_' + (new Date()).getTime(),
+						name: name,
+						text: string,
+
+						// this parameter is to add the timestamp to
+						// the local display. It is not needed for the API call
+						timestamp: new Date().toISOString()
+					};
+					socket.emit("message", message);
+					appendMessage(message, name);
+				}
+
+				connect();
+
+				this.sendMessage = sendMessage;
+			}
+
+			var messageApi = new FTHubotWSAPI("Web user");
+
+			$submitButton.on('click', function () {
+				messageApi.sendMessage($textEntry.val());
+				$textEntry.val("");
+			});
+
+			$textEntry.on('keyup', function (e) {
+				if (e.keyCode === 13) {
+					messageApi.sendMessage($textEntry.val());
+					$textEntry.val("");
+				}
+			});
+		</script>
+	</body>
+</html>
