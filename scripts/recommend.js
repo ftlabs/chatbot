@@ -19,6 +19,7 @@ module.exports = function (robot) {
 			API.pricing.findSymbol(term)
 				.then(API.pricing.getConsensusRecommedations)
 				.then(function(advice) {
+					if (!advice.smartText) throw('No results for ' + term);
 					res.send(advice.smartText);
 				})
 				.catch(function(e) {
