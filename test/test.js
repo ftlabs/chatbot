@@ -40,15 +40,34 @@ More commands and details:
 	});
 
 	it("suggest angela merkel", function(done) {
-		const helper = new Helper('../scripts/help.js');
+		const helper = new Helper('../scripts/search.js');
 		room = helper.createRoom();
 		const command = '@hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			expect(room.messages).to.eql([
-				['alice', command],
-				['hubot', 'response'],
-			]);
+			expect(room.messages.length).to.eql(2);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("good evening", function(done) {
+		const helper = new Helper('../scripts/polite.js');
+		room = helper.createRoom();
+		const command = '@hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("recommend apple", function(done) {
+		const helper = new Helper('../scripts/recommend.js');
+		room = helper.createRoom();
+		const command = '@hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
 			done();
 		}).catch(e => done(e));
 	});
