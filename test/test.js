@@ -2,28 +2,26 @@
 const expect = require("chai").expect;
 const co = require('co');
 
-const Helper = require('hubot-test-helper')
-const helper = new Helper('../scripts');
+const Helper = require('hubot-test-helper');
 
+process.env.PORT = 3001;
 require('dotenv').config({silent: true});
 
-describe("Replies when requesting help", function() {
+describe("Replies correctly", function() {
 	let room;
 
-	before(function(done) {
-		room = helper.createRoom();
-		done();
-	});
-
-	after(function() {
+	afterEach(function() {
 		room.destroy();
 	});
 
-	it("responds when greeted", function(done) {
+	it("help", function(done) {
+		const helper = new Helper('../scripts/help.js');
+		room = helper.createRoom();
+		const command = '@hubot ' + this.test.title;
 		co(function *() {
-			yield room.user.say('alice', '@hubot help');
+			yield room.user.say('alice', command);
 			expect(room.messages).to.eql([
-				['alice', '@hubot help'],
+				['alice', command],
 				['hubot', `If interested in, say, apple:
 • search apple
 • price apple
@@ -36,6 +34,20 @@ or a topic:
 • follow T2
 More commands and details:
 • help all`],
+			]);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("suggest angela merkel", function(done) {
+		const helper = new Helper('../scripts/help.js');
+		room = helper.createRoom();
+		const command = '@hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages).to.eql([
+				['alice', command],
+				['hubot', 'response'],
 			]);
 			done();
 		}).catch(e => done(e));
