@@ -141,6 +141,7 @@ module.exports = function (robot) {
 	server = http.createServer(robot.router);
 
 	// Get the server to listen on the HEROKU port
+	server.listen(process.env.PORT);
 	console.log('Robot listening on port ' + process.env.PORT, '(process.env.PORT)');
 
 	// Set up Websockets on the server

@@ -64,4 +64,3 @@ You can only pick one:
 * BITLY_LOGIN - bitly api
 * CAPI_API_KEY - capi api
 * MARKETS_API_KEY - market api
-* MARKETS_API_KEY - market api
