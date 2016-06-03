@@ -55,7 +55,7 @@ module.exports = function (robot) {
 					res.fail(failMessage);
 				}
 			}
-			res.message.finish();
 		}
+		res.message.finish();
 	});
 };

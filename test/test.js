@@ -2,6 +2,7 @@
 const expect = require("chai").expect;
 const co = require('co');
 const nock = require('./nock');
+const CatchAllMessage = require('hubot').CatchAllMessage;
 process.env.NO_ONBOARDING = true;
 
 const Helper = require('hubot-test-helper');
@@ -30,13 +31,27 @@ describe("Replies correctly to", function() {
 		room = helper.createRoom({
 			httpd: false
 		});
+
+		const oldReceive = room.robot.receive;
+		room.robot.receive = function name(message, resolveIn) {
+			return new Promise(resolve => oldReceive.apply(room.robot, [message, resolve]))
+			.then(() => {
+				if (message instanceof CatchAllMessage) {
+					message = message.message;
+				}
+				if (message.done) {
+					resolveIn(message);
+				} else {
+					message.once('finish', () => resolveIn(message));
+				}
+			});
+		};
 	});
 
 	it("help", function(done) {
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			yield waitABit(10);
 			expect(room.messages).to.eql([
 				['alice', command],
 				['hubot', "If interested in, say, apple:\n• search apple\n• price apple\n• recommend apple\n• topics apple\nFor more on an article:\n• A2\nor a topic:\n• T1\n• follow T2\nMore commands and details:\n• help all"],
@@ -60,7 +75,6 @@ describe("Replies correctly to", function() {
 		const errorMessage = 'I don\'t know what that means.  Say `hi` to find out about me or `help` if you want to know everything I can do.';
 		co(function *() {
 			yield room.user.say('alice', command);
-			yield waitABit(10);
 			expect(room.messages).to.eql([
 				['alice', command],
 				['hubot', errorMessage],
@@ -73,7 +87,9 @@ describe("Replies correctly to", function() {
 		const command = 'hubot' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			yield waitABit(10);
+
+			// wait a smidge to ensure no response is received
+			yield waitABit(100);
 			expect(room.messages).to.eql([
 				['alice', command],
 			]);
@@ -86,7 +102,6 @@ describe("Replies correctly to", function() {
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			yield waitABit(10);
 			expect(room.messages).to.eql([
 				['alice', command],
 				['hubot', 'As of May 27, 2016, the consensus forecast amongst 51 polled investment analysts covering Apple Inc. advises that the company will outperform the market. This has been the consensus forecast since the sentiment of investment analysts deteriorated on Sep 29, 2011. The previous consensus forecast advised investors to purchase equity in Apple Inc..']
