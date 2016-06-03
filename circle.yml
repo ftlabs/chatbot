@@ -1,4 +1,5 @@
 machine:
   services:
     - redis
-
+  node:
+    version: "6"
