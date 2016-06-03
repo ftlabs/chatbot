@@ -1,20 +1,22 @@
 // Description:
 //   Provides a web address where chat logs can be viewed and operators can interject
+// Commands
 
 // Dependencies
-var moment = require('moment');
-var exphbs  = require('express-handlebars');
-var IO = require('socket.io');
-var Wss = require('ws').Server;
-var redis = require('../lib/redis');
-var http = require('http');
-var fs = require('fs');
-var Handlebars = require('handlebars');
-var uniq = require('uniq');
+const moment = require('moment');
+const exphbs = require('express-handlebars');
+const socketio = require('socket.io');
+const redis = require('../lib/redis');
+const http = require('http');
+const fs = require('fs');
+const Handlebars = require('handlebars');
+const uniq = require('uniq');
 
-var API_ENDPOINTS_REDIS_KEY = 'apiEndpoints';
-var apiEndpoints = [];
-var logTemplate;
+'use strict';
+
+const API_ENDPOINTS_REDIS_KEY = 'apiEndpoints';
+const apiEndpoints = [];
+let logTemplate;
 
 fs.readFile('./views/partials/log.handlebars', { encoding: "utf8" }, function (err, data) {
 	if (err) throw err;
@@ -26,9 +28,11 @@ function updateApiEndpoints(cb) {
 		redis.redis.get(API_ENDPOINTS_REDIS_KEY, function (err, data) {
 			if (err) throw err;
 			if (!data) {
-				apiEndpoints = [];
+				apiEndpoints.splice(0);
 			} else {
-				apiEndpoints = uniq(apiEndpoints.concat(JSON.parse(data)));
+				apiEndpoints.splice(0);
+				apiEndpoints.push(...JSON.parse(data));
+				uniq(apiEndpoints);
 			}
 			if (cb) cb(apiEndpoints);
 		});
@@ -51,7 +55,7 @@ function setupWebsocketServer(server, robot) {
 	var heartbeatN = 1;
 
 	// Setup websockets to run on the same http server
-	io = IO(server);
+	io = socketio(server);
 
 	setInterval(function heartbeat() {
 		io.emit('heartbeat', { id: heartbeatN++ });
@@ -88,13 +92,13 @@ function setupWebsocketServer(server, robot) {
 	io.on('connection', function(ws) {
 		console.log('websocket connection open');
 
-		ws.on('endpoint', function(url) {
+		ws.on('endpoint', function(data) {
 			if (apiEndpoints.indexOf(data.endpoint.toLowerCase()) === -1) {
 				apiEndpoints.push(data.endpoint.toLowerCase());
 			}
 			storeApiEndpoints();
 		});
-		ws.on('removeEndpoint', function(url) {
+		ws.on('removeEndpoint', function(data) {
 			apiEndpoints = apiEndpoints.filter(function (val) {
 				return val.toLowerCase() !== data.endpoint.toLowerCase();
 			});
@@ -127,20 +131,19 @@ function setupWebsocketServer(server, robot) {
 }
 
 module.exports = function (robot) {
-	var app = robot.router;
-	var server;
-
 	// Fetch a list of all of the websocket endpoints to be passed to the client
 	updateApiEndpoints();
 
 	// Save the robot on exit
 	process.on('SIGTERM', robot.brain.save);
 
-	// REVIEW:AB: Doesn't hubot do this itself?
-	// The bot runs on the EXPRESS_PORT forward requests to it.
-	server = http.createServer(robot.router);
-
-	// Get the server to listen on the HEROKU port
+	// Hubots internal server does not expose the http server to attach an IO listener.
+	// So we need to create a new server and proxy the requests to it.
+	// hubots internal server's port is not exposed
+	if (robot.router.listen === undefined) return;
+	const app = robot.router;
+	const server = http.createServer(app);
+	robot.router = app;
 	server.listen(process.env.PORT);
 	console.log('Robot listening on port ' + process.env.PORT, '(process.env.PORT)');
 
@@ -188,11 +191,11 @@ module.exports = function (robot) {
 
 				res.render('logs', {
 					logs: replies.reverse().map(function (itemString) {
-							var item = JSON.parse(itemString);
-							item.robotTime = moment(item.timestamp, 'x').format();
-							item.humanTime = moment(item.timestamp, 'x').format('lll');
-							return item;
-						}),
+						const item = JSON.parse(itemString);
+						item.robotTime = moment(item.timestamp, 'x').format();
+						item.humanTime = moment(item.timestamp, 'x').format('lll');
+						return item;
+					}),
 					websocketApiLocations: apiEndpoints
 				});
 			});

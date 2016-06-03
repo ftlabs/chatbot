@@ -20,9 +20,9 @@ module.exports = function (robot) {
 		name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 		if (this.alias) {
 			alias = this.alias.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-			newRegex = new RegExp("^\\s*[@]?(?:" + alias + "[:,]?|" + name + "[:,]?)\\s*(?:" + pattern + ")", modifiers);
+			newRegex = new RegExp("^\\s*[@]?(?:" + alias + "[:,]?|" + name + "[:,]?)\\s+(?:" + pattern + ")", modifiers);
 		} else {
-			newRegex = new RegExp("^\\s*[@]?" + name + "[:,]?\\s*(?:" + pattern + ")", modifiers);
+			newRegex = new RegExp("^\\s*[@]?" + name + "[:,]?\\s+(?:" + pattern + ")", modifiers);
 		}
 		return newRegex;
 	}).bind(robot);
