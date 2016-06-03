@@ -4,13 +4,16 @@
 // Commands:
 //   hubot recommend <company> - Displays analyst recommendations for <company> (can be a name or ticker symbol)
 
-var API = require("../lib/ftapis");
+'use strict';
+
+const API = require("../lib/ftapis");
 
 module.exports = function (robot) {
 
 	robot.respond(/recommend(?:\s+(.*))?/i, function (res) {
+
 		res = require('../lib/autolog')(res); // Log the query to the database
-		var term = res.match[1];
+		const term = res.match[1];
 
 		if (! term) {
 			res.send('You need to specify a company name, e.g. recommend apple');

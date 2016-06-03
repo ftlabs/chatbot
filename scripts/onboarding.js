@@ -1,9 +1,9 @@
 // Description:
 //   Send a welcome message to new users.
+'use strict';
 
-var SEEN_LOG_PREFIX = "USER_SEEN_V0.12_";
-
-var onboardMessage = [  '*Welcome to the FT Bot*.',
+const SEEN_LOG_PREFIX = "USER_SEEN_V0.12_";
+const onboardMessage = [ '*Welcome to the FT Bot*.',
 						'I am a robot, not a real person, but I can help connect you with content and services from the Financial Times. Try saying ',
 						'`price apple`',
 						'`search obama`',
@@ -21,11 +21,11 @@ function genKey(robot, user) {
 function dmWelcomeMessage(res) {
 
 	switch(res.robot.adapterName) {
-		case 'slack':
-			res.robot.send({room: res.message.user.name}, onboardMessage);
-			break;
-		default:
-			res.robot.send({user: res.message.user}, onboardMessage);
+	case 'slack':
+		res.robot.send({room: res.message.user.name}, onboardMessage);
+		break;
+	default:
+		res.robot.send({user: res.message.user}, onboardMessage);
 	}
 }
 
@@ -48,7 +48,8 @@ module.exports = function (robot) {
 };
 
 module.exports.onboard = function (res) {
-	var onboarded = false;
+	let onboarded = false;
+	if (process.env.NO_ONBOARDING) return false;
 	if (!res.robot.brain.get(genKey(res.robot, res.message.user))) {
 		dmWelcomeMessage(res);
 		onboarded = true;

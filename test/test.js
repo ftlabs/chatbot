@@ -1,73 +1,98 @@
 'use strict';
 const expect = require("chai").expect;
 const co = require('co');
+const nock = require('./nock');
+process.env.NO_ONBOARDING = true;
 
 const Helper = require('hubot-test-helper');
 
 process.env.PORT = 3001;
 require('dotenv').config({silent: true});
 
-describe("Replies correctly", function() {
-	let room;
+function waitABit(time) {
+	return new Promise(function wait(resolve) {
+		setTimeout(resolve, time);
+	});
+}
 
-	afterEach(function() {
-		room.destroy();
+describe("Replies correctly to", function() {
+	let room;
+	let helper;
+
+	before(function() {
+		helper = new Helper(
+			'../scripts/'
+		);
+	});
+
+	beforeEach(function() {
+		nock.cleanAll();
+		room = helper.createRoom({
+			httpd: false
+		});
 	});
 
 	it("help", function(done) {
-		const helper = new Helper('../scripts/help.js');
-		room = helper.createRoom();
-		const command = '@hubot ' + this.test.title;
+		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
+			yield waitABit(10);
 			expect(room.messages).to.eql([
 				['alice', command],
-				['hubot', `If interested in, say, apple:
-• search apple
-• price apple
-• recommend apple
-• topics apple
-For more on an article:
-• A2
-or a topic:
-• T1
-• follow T2
-More commands and details:
-• help all`],
+				['hubot', "If interested in, say, apple:\n• search apple\n• price apple\n• recommend apple\n• topics apple\nFor more on an article:\n• A2\nor a topic:\n• T1\n• follow T2\nMore commands and details:\n• help all"],
 			]);
 			done();
 		}).catch(e => done(e));
 	});
 
 	it("good evening", function(done) {
-		const helper = new Helper('../scripts/polite.js');
-		room = helper.createRoom();
-		const command = '@hubot ' + this.test.title;
+		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
 			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1]).to.match(/It is, isn't it|Hi|And to you/);
 			done();
 		}).catch(e => done(e));
 	});
 
-	it("blahwithspace", function(done) {
-		const helper = new Helper('../scripts/search.js');
-		room = helper.createRoom();
-		const command = '@hubot ' + this.test.title;
+	it("failwithspace", function(done) {
+		const command = 'hubot ' + this.test.title;
+		const errorMessage = 'I don\'t know what that means.  Say `hi` to find out about me or `help` if you want to know everything I can do.';
 		co(function *() {
 			yield room.user.say('alice', command);
-			setTimeout(() => expect(room.messages.length).to.eql(2), 100);
+			yield waitABit(10);
+			expect(room.messages).to.eql([
+				['alice', command],
+				['hubot', errorMessage],
+			]);
 			done();
 		}).catch(e => done(e));
 	});
 
-	it("blahnospace", function(done) {
-		const helper = new Helper('../scripts/search.js');
-		room = helper.createRoom();
-		const command = '@hubot' + this.test.title;
+	it("failnospace", function(done) {
+		const command = 'hubot' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			setTimeout(() => expect(room.messages.length).to.eql(2), 100);
+			yield waitABit(10);
+			expect(room.messages).to.eql([
+				['alice', command],
+			]);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("recommend apple", function(done) {
+		nock.recommend();
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			console.log(command);
+			yield waitABit(1000);
+			console.log(room.messages);
+			expect(room.messages).to.eql([
+				['alice', command],
+				['hubot', 'As of May 27, 2016, the consensus forecast amongst 51 polled investment analysts covering Apple Inc. advises that the company will outperform the market. This has been the consensus forecast since the sentiment of investment analysts deteriorated on Sep 29, 2011. The previous consensus forecast advised investors to purchase equity in Apple Inc..']
+			]);
 			done();
 		}).catch(e => done(e));
 	});

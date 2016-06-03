@@ -1,6 +1,14 @@
 // Description:
 //   Display a list of all valid commands, by scraping file header comments
 //   like this one from modules in the scripts folder
+// Dependencies:
+//
+// Commands:
+//   hubot help - display help message
+//   hubot help <command> - information about that command
+//   hubot help all - list all commands
+
+'use strict';
 
 // The structure is a list of sections,
 // where each section has a name and some descriptive text, e.g. *Basic Search*)
@@ -17,23 +25,26 @@ var fullHelpTemplate = [
 var bullet = "\u2022";
 
 var initialHelpTextLines = [
-'If interested in, say, apple:',
-bullet + ' search apple',
-bullet + ' price apple',
-bullet + ' recommend apple',
-bullet + ' topics apple',
-'For more on an article:',
-bullet + ' A2',
-'or a topic:',
-bullet + ' T1',
-bullet + ' follow T2',
-'More commands and details:',
-bullet + ' help all'
+	'If interested in, say, apple:',
+	bullet + ' search apple',
+	bullet + ' price apple',
+	bullet + ' recommend apple',
+	bullet + ' topics apple',
+	'For more on an article:',
+	bullet + ' A2',
+	'or a topic:',
+	bullet + ' T1',
+	bullet + ' follow T2',
+	'More commands and details:',
+	bullet + ' help all'
 ];
 
 module.exports = function(robot) {
 	robot.respond(/(?:h|help)(?:\s+(.*))?$/i, function(res) {
-		var cmds, emit, filter, prefix, lines;
+		let cmds;
+		let filter;
+		let prefix;
+		let lines;
 
 		// preprocess the cmds to have the relevant prefix - currently we prefer no name prefix, but conventionally it is `robot.alias || robot.name`
 		prefix = '';
@@ -78,8 +89,12 @@ module.exports = function(robot) {
 		return res.send(lines.join("\n"));
 	});
 
-	return robot.router.get("/" + robot.name + "/help", function(req, res) {
-		var cmds, emit;
+
+	if (robot.router.listen === undefined) return;
+
+	robot.router.get("/" + robot.name + "/help", function(req, res) {
+		let cmds;
+		let emit;
 		cmds = robot.helpCommands().map(function(cmd) {
 			return cmd.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		});
