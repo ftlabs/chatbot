@@ -42,6 +42,8 @@ module.exports = function (robot) {
 			var failMessage = 'I don\'t know what that means.  Say `hi` to find out about me or `help` if you want to know everything I can do.';
 			var m;
 
+
+			res.finish();
 			if (res.message.text.match(/\`/)) {
 				res.send("Try again without the back-tick quotes.");
 			} else if (m = res.message.text.match(/^\@?ft(?:-bot)?[:,]?\s+(\@?ft(?:-bot)?)/)) {

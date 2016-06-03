@@ -41,6 +41,7 @@ var initialHelpTextLines = [
 
 module.exports = function(robot) {
 	robot.respond(/(?:h|help)(?:\s+(.*))?$/i, function(res) {
+
 		let cmds;
 		let filter;
 		let prefix;
@@ -82,13 +83,13 @@ module.exports = function(robot) {
 			});
 			if (lines.length === 0) {
 				res.send("No available commands match " + filter + '. To see all commands, help all');
+				res.finish();
 				return;
 			}
 		}
-
+		res.finish();
 		return res.send(lines.join("\n"));
 	});
-
 
 	if (robot.router.listen === undefined) return;
 
