@@ -1,5 +1,7 @@
 // Description:
 //	 Adds slash commands peudo-adapter interface for Slack
+//	 Sets up the websockets adapter for the web widget
+//   Sets up the rest api for interacting with the bot
 
 var webinterfaces = require('../lib/webinterfaces/');
 
