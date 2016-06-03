@@ -83,12 +83,11 @@ module.exports = function(robot) {
 			});
 			if (lines.length === 0) {
 				res.send("No available commands match " + filter + '. To see all commands, help all');
-				res.finish();
-				return;
+				return res.finish();
 			}
 		}
-		res.finish();
-		return res.send(lines.join("\n"));
+		res.send(lines.join("\n"));
+		return res.finish();
 	});
 
 	if (robot.router.listen === undefined) return;

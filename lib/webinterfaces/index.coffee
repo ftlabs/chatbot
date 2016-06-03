@@ -16,10 +16,6 @@ module.exports = (robot) ->
 				@send = (message) =>
 					@message.send(message);
 
-	# Set up the endpoints
-	require('./slack')(robot)
-	require('./websockets')(robot)
-
 	return {
 		Response: NewResponse
 	}

@@ -43,7 +43,7 @@ module.exports = function (robot) {
 			var m;
 
 
-			res.finish();
+			res.message.finish();
 			if (res.message.text.match(/\`/)) {
 				res.send("Try again without the back-tick quotes.");
 			} else if (m = res.message.text.match(/^\@?ft(?:-bot)?[:,]?\s+(\@?ft(?:-bot)?)/)) {
