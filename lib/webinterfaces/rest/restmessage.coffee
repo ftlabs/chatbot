@@ -14,8 +14,10 @@ class RestMessage extends WebMessage
 		@buffer = [];
 	send: (message) =>
 		@buffer.push(message);
+	dm: (message) =>
+		@buffer.push(message);
 	finish: () =>
 		super()
-		@res.send(@buffer.join('/n'));
+		@res.send(@buffer.join('\n'));
 
 module.exports = RestMessage

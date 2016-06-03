@@ -12,6 +12,7 @@ module.exports = function (robot) {
 	commands.push('__secret');
 	robot.respond(/__secret$/i, function (res) {
 		res.send('Available secret commands\n`' + commands.join('`\n`') + '`');
+		res.finish();
 	});
 
 	commands.push('__scope');
@@ -21,6 +22,7 @@ module.exports = function (robot) {
 		var scope = brain.scope;
 		console.log("DEBUG: behindTheScenes: __scope: scope=", scope, ", res=", res);
 		res.send('__Admin View:\n scope=' + scope);
+		res.finish();
 	});
 
 	commands.push('__redis stats');
@@ -29,13 +31,18 @@ module.exports = function (robot) {
 		// Log the query to the database
 		res = require('../lib/autolog')(res);
 
-		if (!redis.redis) return res.send('I don\'t seem to be connected to a Redis instance');
+		if (!redis.redis) {
+			res.send('I don\'t seem to be connected to a Redis instance');
+			return res.finish();
+		}
 
 		redis.redis.info('all', function (err, result) {
 			if (err) {
-				return res.send(err);
+				res.send(err);
+				return res.finish();
 			}
 			res.send(result);
+			res.finish()
 		});
 	});
 
@@ -48,9 +55,13 @@ module.exports = function (robot) {
 		// Log the query to the database
 		res = require('../lib/autolog')(res);
 
-		if (!redis.redis) return res.send('I don\'t seem to be connected to a Redis instance');
+		if (!redis.redis) {
+			res.send('I don\'t seem to be connected to a Redis instance');
+			return res.finish();
+		}
 
 		res.send('Are you sure you want to do that?');
+		res.finish();
 
 		robot.respond(/./i, function tempCatchAll(res) {
 			if (user === res.user) {
@@ -68,6 +79,7 @@ module.exports = function (robot) {
 				} else {
 					res.send('You didn\'t reply \'yes\' so I won\'t empty Redis');
 				}
+				res.finish();
 
 				// Remove listener once responded to.
 				robot.listeners = robot.listeners.filter(function (listener) {
@@ -87,9 +99,13 @@ module.exports = function (robot) {
 		// Log the query to the database
 		res = require('../lib/autolog')(res);
 
-		if (!redis.redis) return res.send('I don\'t seem to be connected to a Redis instance');
+		if (!redis.redis) {
+			res.send('I don\'t seem to be connected to a Redis instance');
+			return res.finish();
+		}
 
 		res.send('Are you sure you want to do clear the logs?');
+		res.finish();
 
 		robot.respond(/./i, function tempCatchAll(res) {
 			if (user === res.user) {
@@ -97,9 +113,11 @@ module.exports = function (robot) {
 					redis.emptyLogs(function (err) {
 						if (!err) return res.send('Logs cleared');
 						res.send(err);
+						res.finish();
 					});
 				} else {
 					res.send('You didn\'t reply \'yes\' so I won\'t clear the logs');
+					res.finish();
 				}
 
 				// Remove listener once responded to.
@@ -117,11 +135,18 @@ module.exports = function (robot) {
 		// Log the query to the database
 		res = require('../lib/autolog')(res);
 
-		if (!redis.redis) return res.send('I don\'t seem to be connected to a Redis instance');
+		if (!redis.redis) {
+			res.send('I don\'t seem to be connected to a Redis instance');
+			res.finish();
+		}
 
 		redis.trimLogs(function (err) {
-			if (!err) return res.send('Logs trimmed');
+			if (!err) {
+				res.send('Logs trimmed');
+				return res.finish();
+			}
 			res.send(err);
+			res.finish();
 		});
 	});
 
@@ -135,6 +160,7 @@ module.exports = function (robot) {
 
 		res.send("Number of matches: "+results.length+".  Showing up to 20.");
 		res.send(results.slice(0, 20).join('\n'));
+		res.finish();
 	});
 
 	commands.push('__brain rm [RegExp pattern]');
@@ -153,5 +179,6 @@ module.exports = function (robot) {
 		});
 
 		res.send('Removed '+count+' keys from the brain');
+		res.finish();
 	});
 };

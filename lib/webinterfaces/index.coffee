@@ -15,6 +15,8 @@ module.exports = (robot) ->
 			if @message instanceof WebMessage
 				@send = (message) =>
 					@message.send(message);
+				@fail = (message) =>
+					@message.send(message);
 
 	return {
 		Response: NewResponse

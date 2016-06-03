@@ -12,6 +12,7 @@ module.exports = function (robot) {
 	robot.respond(/share(\s+\S+)?$/, function(res) {
 		res = require('../lib/autolog')(res);
 		res.send('You need to specify an article to share and an email address to share it with, e.g. share A5 with joe@bloggs.com');
+		res.finish();
 	});
 
 	robot.respond(/share\s+(\#|number\s+)?(\w?\d+)(\s+with)?\s+([\w\d\s\.\-\@\+]+)/i, function (res) {
@@ -24,13 +25,19 @@ module.exports = function (robot) {
 		res = require('../lib/autolog')(res);
 
 		if (!storyContext.get(1)) {
-			return res.send("I don't know which story you're referring to. Use `search` to find some stories to share");
+			res.send("I don't know which story you're referring to. Use `search` to find some stories to share");
+			res.finish();
+			return;
 		} else if (!story) {
-			return res.send("The list of stories available to share is from 1 to "+storyContext.length+".  There is no story "+(storyNo));
+			res.send("The list of stories available to share is from 1 to "+storyContext.length+".  There is no story "+(storyNo));
+			res.finish();
+			return;
 		}
 
 		if (!emailPat.test(recip)) {
-			return res.send("Recipient must be an email address, but I didn't recognise '"+recip+"' as an email address.  Try again?");
+			res.send("Recipient must be an email address, but I didn't recognise '"+recip+"' as an email address.  Try again?");
+			res.finish();
+			return;
 		}
 
 		API.share.send(recip, story)
@@ -40,6 +47,9 @@ module.exports = function (robot) {
 			.catch(function(err) {
 				res.send("Sorry, a problem prevented your email from being sent");
 				console.log('Error sending email this: err: ', err);
+			})
+			.then(function () {
+				res.finish();
 			})
 		;
 	});

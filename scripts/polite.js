@@ -12,6 +12,7 @@ module.exports = function (robot) {
 			"It's what I'm here for",
 			"Glad to help"
 		]));
+		res.finish();
 	});
 
 	robot.respond(/(bye|kthxbye|good\s*bye|(see|catch)\s+y(ou|a)\s+later|laters)$/i, function (res) {
@@ -20,6 +21,7 @@ module.exports = function (robot) {
 			"Goodbye",
 			"See you later"
 		]));
+		res.finish();
 	});
 
 	robot.respond(/(good\s+(morning|afternoon|evening)|hello\s+again)/i, function (res) {
@@ -28,10 +30,12 @@ module.exports = function (robot) {
 			"Hi",
 			"And to you"
 		]));
+		res.finish();
 	});
 
 	robot.respond(/(shut\s+up|stop|go\s+away|(fuck|sod|bugger)\s+off|quiet(\s+down)?)$/i, function (res) {
 		res.send("If you would like me to stop alerting, say `alerts off`.  If you want me to stop interacting with you at all, you can unfriend me or remove my integration on your instant message service.  If you are using a corporate chat system, consult your suppport team.");
+		res.finish();
 	});
 
 };

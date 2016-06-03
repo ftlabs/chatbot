@@ -79,6 +79,7 @@ var handleSearch = function(res, term) {
 
 	if(! term) {
 		res.send('You need to specify a word or phrase to search for, or a topic id, e.g. search bear market, or search T2');
+		res.finish();
 		return;
 	} else if (topicContext.isValidIndex(term)) {
 		// handle a numbered tag
@@ -86,6 +87,7 @@ var handleSearch = function(res, term) {
 		term = topicContext.get(term);
 		if (!term) {
 			res.send('Unknown topic. Say `topics` to find out what topics I already found for you, or `topics something` to find one.');
+			res.finish();
 			return;
 		}
 	} else if (/^\w{2,5}\:\w{3}$/.test(term)) {
@@ -130,6 +132,7 @@ var handleSearch = function(res, term) {
 						} else {
 							res.send('No related topics for *' + term + '*');
 						}
+						res.finish();
 					}
 				});
 			} else {
@@ -142,12 +145,14 @@ var handleSearch = function(res, term) {
 						} else {
 							res.send('No topic suggestions for *' + term + '*');
 						}
+						res.finish();
 					}
 				});
 			}
 		})
 		.catch(function(err) {
 			res.send('Unable to load results for *' + term + '*');
+			res.finish();
 			console.log(err, err.stack);
 		})
 	;
@@ -169,8 +174,10 @@ module.exports = function (robot) {
 			if (suggestions.length > 0) {
 				suggestions = suggestions.slice(0,API.listLength.short);
 				res.send('FT topics matching *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
+				res.finish();
 			} else {
 				res.send('Nothing found for *' + term + '*.  Try a topic, or the name of a company, industry or person.');
+				res.finish();
 			}
 		});
 	});
@@ -179,6 +186,7 @@ module.exports = function (robot) {
 		res = require('../lib/autolog')(res);
 		var mode = res.match[1];
 		res.send('You need to specify a search term or a topic, e.g. ' + mode + ' collapse, or ' + mode + ' T2');
+		res.finish();
 	});
 
 	robot.respond(/(latest|search)\s+(.*)$/i, handleSearch );
@@ -187,6 +195,7 @@ module.exports = function (robot) {
 		res = require('../lib/autolog')(res);
 		var mode = res.match[1];
 		res.send('You need to specify a topic, e.g. topic T3, or T3');
+		res.finish();
 	});
 
 	robot.respond(/(?:topic\s+T?|T)?\s*(\d+)/i, function(res) {
@@ -199,6 +208,7 @@ module.exports = function (robot) {
 		res = require('../lib/autolog')(res);
 		var mode = res.match[1];
 		res.send('You need to specify an article, e.g. article A3, or A3');
+		res.finish();
 	});
 
 	robot.respond(/(?:article\s+A?|A)\s*(\d+)/i, function (res) {
@@ -220,5 +230,7 @@ module.exports = function (robot) {
 
 			res.send(articleFullerFormatter(article) + topicDetails);
 		}
+
+		res.finish();
 	});
 };
