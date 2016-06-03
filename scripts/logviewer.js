@@ -144,7 +144,7 @@ module.exports = function (robot) {
 	const app = robot.router;
 	const server = http.createServer(app);
 	robot.router = app;
-	app.listen(process.env.PORT);
+	server.listen(process.env.PORT);
 	console.log('Robot listening on port ' + process.env.PORT, '(process.env.PORT)');
 
 	// Set up Websockets on the server
