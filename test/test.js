@@ -86,9 +86,7 @@ describe("Replies correctly to", function() {
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
-			console.log(command);
-			yield waitABit(1000);
-			console.log(room.messages);
+			yield waitABit(10);
 			expect(room.messages).to.eql([
 				['alice', command],
 				['hubot', 'As of May 27, 2016, the consensus forecast amongst 51 polled investment analysts covering Apple Inc. advises that the company will outperform the market. This has been the consensus forecast since the sentiment of investment analysts deteriorated on Sep 29, 2011. The previous consensus forecast advised investors to purchase equity in Apple Inc..']
