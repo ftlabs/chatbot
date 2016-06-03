@@ -16,6 +16,7 @@ module.exports = function (robot) {
 
 		if (! term) {
 			res.send('You need to specify a term or phrase, e.g. define leverage');
+			res.finish();
 			return;
 		} else {
 			var termContext = require('../lib/scopedlist').getDefinitionContext(res);
@@ -24,9 +25,11 @@ module.exports = function (robot) {
 				.then(function(def) {
 					var defstr = "*"+term+"*:   "+def;
 					res.send(numbers(termContext.add(defstr)));
+					res.finish();
 				})
 				.catch(function(e) {
 					res.send('Unable to display definition for "'+term+'".');
+					res.finish();
 					console.log(e);
 				})
 			;

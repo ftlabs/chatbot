@@ -19,6 +19,7 @@ module.exports = function (robot) {
 
 		if (! term) {
 			res.send('You need to specify a company name or ticker symbol, e.g. price apple, or price AAPL');
+			res.finish();
 			return;
 		} else {
 			res = require('../lib/progressfeedback')(res);	// Pricing can take a while, so mix in progress feedback behaviour
@@ -34,7 +35,9 @@ module.exports = function (robot) {
 				term = priceMatch.basic.symbol;
 			} else if (/^T\d+$/i.test(term) && topicMatch) {
 				if (topicMatch.indexOf('organisations:') !== 0) {
-					return res.send(term + ' is not an organisation topic.  Organisation topics start with `organisations:`');
+					res.send(term + ' is not an organisation topic.  Organisation topics start with `organisations:`');
+					res.finish();
+					return;
 				}
 				term = topicMatch;
 			}
@@ -49,10 +52,12 @@ module.exports = function (robot) {
 						.then(API.shorturls.shorten)
 						.then(function(chart) {
 							res.send(numbers(priceContext.add(company, priceIdentifier), priceDecorator) + " " + numberFormat(company.quote.lastPrice,2) + ", " + (company.quote.change1Day > 0 ? "\u25b2" : "\u25bc") + " " + numberFormat(company.quote.change1Day, 2) + (company.quote.volume ? ". Vol: " + numberFormat(company.quote.volume) : "") + ". Chart: " + chart);
+							res.finish();
 						});
 				})
 				.catch(function(e) {
 					res.send('Unable to provide pricing information for "'+term+'".');
+					res.finish();
 					console.log(e);
 				})
 			;

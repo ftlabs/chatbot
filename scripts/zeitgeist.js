@@ -27,6 +27,9 @@ var handleZeitgeistRecency = function(recencyFnName, recencyText, res){
 	.catch(function(e) {
 		res.send('zeitgeist' + display_flavour + ': none');
 		console.log(e);
+	})
+	.then(function () {
+		res.finish();
 	});
 };
 

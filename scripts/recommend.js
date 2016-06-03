@@ -17,6 +17,7 @@ module.exports = function (robot) {
 
 		if (! term) {
 			res.send('You need to specify a company name, e.g. recommend apple');
+			res.finish();
 			return;
 		} else {
 			API.pricing.findSymbol(term)
@@ -24,9 +25,11 @@ module.exports = function (robot) {
 				.then(function(advice) {
 					if (!advice.smartText) throw('No results for ' + term);
 					res.send(advice.smartText);
+					res.finish();
 				})
 				.catch(function(e) {
 					res.send('Unable to display analyst recommendations for "'+ term +'".');
+					res.finish();
 					console.log(e);
 				})
 			;
