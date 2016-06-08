@@ -18,17 +18,12 @@ const SYMBOL = {
 const COUNTRIES = {
 	gbr: 'the UK',
 	usa: 'the US'
-
-
-
-
+	// TODO
 };
 
 module.exports = function (robot) {
 
 	robot.respond(/(?:(.*)\s)?offers(?:\s+(.*))?/i, function (res) {
-
-		console.log('offers query', API);
 
 		const frequency = res.match[1];
 		const countryCode = res.match[2] ? res.match[2].toUpperCase() : null;
@@ -40,13 +35,12 @@ module.exports = function (robot) {
 		} else {
 
 			res = require('../lib/autolog')(res); // Log the query to the database
-			// res = require('../lib/progressfeedback')(res);	// Pricing can take a while, so mix in progress feedback behaviour
+			res = require('../lib/progressfeedback')(res);
 			return API.getOffers(countryCode, frequency)
 				.then(function(data) {
 
 					let offers = data.offers;
 
-					console.log('\n\n\noffers', offers);
 					let result;
 
 					for (const keyOffer in offers) {
@@ -65,7 +59,6 @@ module.exports = function (robot) {
 										continue;
 									}
 
-									console.log(charges[keyCharge]);
 
 									let thisCharge;
 
@@ -84,7 +77,6 @@ module.exports = function (robot) {
 					res.send(response);
 				})
 				.catch(function(e) {
-					// console.lo(e);
 					res.send('Unable to display offers');
 				});
 		}
