@@ -59,7 +59,6 @@ module.exports = function (robot) {
 										continue;
 									}
 
-
 									let thisCharge;
 
 									if (!seenValues[value]) {
@@ -76,7 +75,7 @@ module.exports = function (robot) {
 
 					res.send(response);
 				})
-				.catch(function(e) {
+				.catch(function() {
 					res.send('Unable to display offers');
 				});
 		}
