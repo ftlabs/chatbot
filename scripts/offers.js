@@ -18,6 +18,10 @@ const SYMBOL = {
 const COUNTRIES = {
 	gbr: 'the UK',
 	usa: 'the US'
+
+
+
+
 };
 
 module.exports = function (robot) {
@@ -27,7 +31,7 @@ module.exports = function (robot) {
 		console.log('offers query', API);
 
 		const frequency = res.match[1];
-		const countryCode = res.match[2];
+		const countryCode = res.match[2] ? res.match[2].toUpperCase() : null;
 		const seenValues = {};
 
 		if (!countryCode && !frequency) {
@@ -37,7 +41,7 @@ module.exports = function (robot) {
 
 			res = require('../lib/autolog')(res); // Log the query to the database
 			// res = require('../lib/progressfeedback')(res);	// Pricing can take a while, so mix in progress feedback behaviour
-			return API.getOffers(countryCode.toUpperCase(), frequency)
+			return API.getOffers(countryCode, frequency)
 				.then(function(data) {
 
 					let offers = data.offers;
@@ -53,7 +57,7 @@ module.exports = function (robot) {
 								if (charges.hasOwnProperty(keyCharge)) {
 
 									const frequency = charges[keyCharge].billingFrequency.displayName;
-									const country = COUNTRIES[offers[0].country.toLowerCase()];
+									const country = COUNTRIES[offers[keyOffer].country.toLowerCase()];
 									const symbol = SYMBOL[charges[keyCharge].amount.symbol.toLowerCase()] || charges[keyCharge.toLowerCase()].amount.symbol;
 									const value = charges[keyCharge].amount.value;
 
