@@ -73,10 +73,8 @@ module.exports = function(robot) {
 			fullHelpTemplate.forEach(function(section) {
 				lines.push(section[0]);
 				section[1].forEach(function(item) {
-					console.log('item', item)
 					cmds
 						.filter(function(cmd) {
-							console.log('cmd', cmd)
 
 							return cmd.match(new RegExp("^("+prefix+"\\s+)?"+item+"\\s", 'i'));
 						})
