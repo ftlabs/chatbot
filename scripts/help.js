@@ -10,6 +10,7 @@
 
 'use strict';
 
+  
 // The structure is a list of sections,
 // where each section has a name and some descriptive text, e.g. *Basic Search*)
 //                    and a list of regexes matching the raw text of the individual command help texts
@@ -19,7 +20,13 @@ var fullHelpTemplate = [
 	['*Searching for content*', ['search', 'articles', 'A<id>', 'topics', 'T<id>', 'define', 'definitions', 'zeitgeist']],
 	['*Querying financial data*', ['price', 'prices', 'recommend']],
 	['*Sending/sharing*', ['share']],
-	['*Alerting*', ['follow', 'unfollow', 'following', 'alerts']]
+	['*Alerting*', ['follow', 'unfollow', 'following', 'alerts']],
+	['*Offers*', [
+		`What's is the cost of <a | an> <annual | monthly | > <premium | standard | trial | > subscription in <country>?`,
+		'currencies',
+		'countries',
+		'Can I purchase a <premium | standard | trial | > subscription in <country>?'
+	]]
 ];
 
 var bullet = "\u2022";
@@ -66,8 +73,11 @@ module.exports = function(robot) {
 			fullHelpTemplate.forEach(function(section) {
 				lines.push(section[0]);
 				section[1].forEach(function(item) {
+					console.log('item', item)
 					cmds
 						.filter(function(cmd) {
+							console.log('cmd', cmd)
+
 							return cmd.match(new RegExp("^("+prefix+"\\s+)?"+item+"\\s", 'i'));
 						})
 						.map(function(cmd) {

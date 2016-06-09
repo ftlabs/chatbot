@@ -1,5 +1,10 @@
 // Description:
-// 		Provides information on FT subscription offers
+//   Provides information on FT subscription offers
+// Commands:
+//   hubot currencies - What currencies do we support?
+//   hubot countries - In what countries do we sell subscriptions?
+//   hubot What's is the cost of <a | an> <annual | monthly | > <premium | standard | trial | > subscription in <country>?
+//   hubot Can I purchase a <premium | standard | trial | > subscription in <country>?
 
 'use strict';
 
@@ -62,11 +67,6 @@ const findKey = function (value, object) {
 
 module.exports = function (robot) {
 
-	// Commands:
-	// - What`s the cost of a subscription in Australia?
-	// - what's the price of a monthly subscription in the UK?
-	// - what's the price of a trial subscription in France?
-	// - what's the cost of a monthly standard subscription in Spain?
 	robot.respond(/(?:w|W)hat(?:'|’)s the (?:price|cost) of (?:a|an)\s*(\s*|monthly|annual)\s*(\s*|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
 
 		const frequency = res.match[1];
@@ -130,9 +130,7 @@ module.exports = function (robot) {
 
 	});
 
-	// Commands:
-	// - What currencies do we support?
-	robot.respond(/(w|W)hat currencies do we support\?/i, function (res) {
+	robot.respond(/currencies/i, function (res) {
 
 		const currencies = {};
 
@@ -177,9 +175,7 @@ module.exports = function (robot) {
 			});
 	});
 
-	// Commands:
-	// - In what countries do we sell subscriptions?
-	robot.respond(/(i|I)n what countries do we sell subscriptions\?/i, function (res) {
+	robot.respond(/countries\?/i, function (res) {
 
 		const response = {};
 
@@ -199,9 +195,6 @@ module.exports = function (robot) {
 			});
 	});
 
-	// Commands:
-	// - Can I purchase a premium subscription in Japan?
-	// - can I purchase a subscription in Sweden?
 	robot.respond(/(?:c|C)an I purchase a\s*(\s|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
 
 		const type = res.match[1];
