@@ -33,9 +33,9 @@ $ npm install
 $ bin/hubot
 ```
 
-This will start the bot in shell mode and interactive.
+This will start the bot in shell mode and interactive. If the HUBOT_SLACK_TOKEN is set, it will default to slack. Chat with `ftbottest` when developing locally.
 
-For full usage of Chatbot you will require the following environment variables
+For full usage of Chatbot you will require the following environment variables (found in LastPass. Internal FT usage only)
 
 ## Basic
 
@@ -64,3 +64,18 @@ You can only pick one:
 * BITLY_LOGIN - bitly api
 * CAPI_API_KEY - capi api
 * MARKETS_API_KEY - market api
+* OFFERS_API_KEY - offer api
+
+## Adding new commands
+
+Drop a script in `/scripts` starting with:
+
+```
+// Description:
+//     ....
+// Commands:
+//     ....
+```
+
+## Requirements
+Node 6+
