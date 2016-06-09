@@ -1,4 +1,5 @@
 'use strict';
+
 const expect = require("chai").expect;
 const co = require('co');
 const nock = require('./nock');

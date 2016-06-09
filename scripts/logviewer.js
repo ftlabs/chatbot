@@ -14,7 +14,6 @@ const fs = require('fs');
 const Handlebars = require('handlebars');
 const uniq = require('uniq');
 
-
 const API_ENDPOINTS_REDIS_KEY = 'apiEndpoints';
 const apiEndpoints = [];
 let logTemplate;
