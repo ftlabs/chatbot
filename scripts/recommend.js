@@ -16,7 +16,7 @@ module.exports = function (robot) {
 		const term = res.match[1];
 
 		if (! term) {
-			res.send('You need to specify a company name, e.g. recommend apple (I\'m local code)');
+			res.send('You need to specify a company name, e.g. recommend apple');
 			return;
 		} else {
 			API.pricing.findSymbol(term)
