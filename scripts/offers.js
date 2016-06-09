@@ -178,7 +178,7 @@ module.exports = function (robot) {
 			});
 	});
 
-	robot.respond(/countries\?/i, function (res) {
+	robot.respond(/countries/i, function (res) {
 
 		const response = {};
 
