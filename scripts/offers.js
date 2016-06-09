@@ -1,83 +1,227 @@
 // Description:
-//
-// Commands:
+// 		Provides information on FT subscription offers
 
 'use strict';
-const API = require("../lib/apis/offersapi");
 
-const SYMBOL = {
-	gbp: '£',
-	usd: '$',
-	jpy: '¥',
-	eur: '€',
-	aud: 'A$',
-	sgd: 'S$',
-	hkd: 'HK$'
+const API = require('../lib/ftapis');
+
+const CURRENCY = {
+	gbp: {
+		symbol: '£',
+		name: 'Great British Pounds'
+	},
+	usd: {
+		symbol: '$',
+		name: 'US Dollars'
+	},
+	jpy: {
+		symbol: '¥',
+		name: 'Yen'
+	},
+	eur: {
+		symbol: '€',
+		name: 'Euros'
+	},
+	aud: {
+		symbol: 'A$',
+		name: 'Australian Dollars'
+	},
+	sgd: {
+		symbol: 'S$',
+		name: 'Singapore Dollars'
+	},
+	hkd: {
+		symbol: 'HK$',
+		name: 'Hong Kong Dollars'
+	},
+	chf: {
+		symbol: 'CHF',
+		name: 'Swiss Francs'
+	}
 };
 
 const COUNTRIES = {
 	gbr: 'the UK',
-	usa: 'the US'
-	// TODO
+	usa: 'the US',
+	aus: 'Australia',
+	che: 'Switzerland',
+	hkg: 'Hong Kong',
+	jpn: 'Japan',
+	sgp: 'Singapore'
+};
+
+const findKey = function (value, object) {
+	for (const key in object) {
+		if (object.hasOwnProperty(key)) {
+			if (value.toLowerCase() === object[key].toLowerCase()) {
+				return key.toUpperCase();
+			}
+		}
+	}
 };
 
 module.exports = function (robot) {
 
-	robot.respond(/(?:(.*)\s)?offers(?:\s+(.*))?/i, function (res) {
+	// Commands:
+	// - What`s the cost of a subscription in Australia?
+	// - what's the price of a monthly subscription in the UK?
+	// - what's the price of a trial subscription in France?
+	// - what's the cost of a monthly standard subscription in Spain?
+	robot.respond(/(?:w|W)hat(?:'|’)s the (?:price|cost) of (?:a|an)\s*(\s*|monthly|annual)\s*(\s*|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
 
 		const frequency = res.match[1];
-		const countryCode = res.match[2] ? res.match[2].toUpperCase() : null;
-		const seenValues = {};
+		const type = res.match[2];
+		let country = res.match[3];
+		let countryCode;
+		let countryName;
 
-		if (!countryCode && !frequency) {
-			res.send('You need to specify a country code, e.g. Monthly offers GBR or All offers USA');
-			return;
-		} else {
+		if (country.length > 3) {
+			countryCode = findKey(country, COUNTRIES) || country;
+			countryName = country;
+		}
+		else {
+			countryCode = country;
+			countryName = country;
+		}
 
-			res = require('../lib/autolog')(res); // Log the query to the database
-			res = require('../lib/progressfeedback')(res);
-			return API.getOffers(countryCode, frequency)
-				.then(function(data) {
+		return API.offers.getOffers(countryCode, type)
+			.then(function (offers) {
+				let result;
 
-					let offers = data.offers;
+				for (const keyOffer in offers) {
+					if (offers.hasOwnProperty(keyOffer)) {
+						let charges = offers[keyOffer].charges;
 
-					let result;
+						for (const keyCharge in charges) {
+							if (charges.hasOwnProperty(keyCharge)) {
+								const frequencyName = charges[keyCharge].billingFrequency ? charges[keyCharge].billingFrequency.displayName : '';
+								const mappedCurrency = CURRENCY[charges[keyCharge].amount.symbol.toLowerCase()];
+								const symbol = mappedCurrency ? mappedCurrency.symbol : charges[keyCharge.toLowerCase()].amount.symbol;
+								const value = charges[keyCharge].amount.value;
 
-					for (const keyOffer in offers) {
-						if (offers.hasOwnProperty(keyOffer)) {
-							let charges = offers[keyOffer].charges;
+								if (frequency.toLowerCase() !== '' && frequency.toLowerCase() !== frequencyName.toLowerCase()) {
+									continue;
+								}
 
-							for (const keyCharge in charges) {
-								if (charges.hasOwnProperty(keyCharge)) {
+								let thisCharge = `${type !== 'trial' ? `*${frequencyName}*` : ''} *${type || 'premium'}* subscriptions in ${countryName} cost *${symbol}${value}*`;
+								result = result ? `${result}\n${thisCharge}` : thisCharge;
 
-									const frequency = charges[keyCharge].billingFrequency.displayName;
-									const country = COUNTRIES[offers[keyOffer].country.toLowerCase()];
-									const symbol = SYMBOL[charges[keyCharge].amount.symbol.toLowerCase()] || charges[keyCharge.toLowerCase()].amount.symbol;
-									const value = charges[keyCharge].amount.value;
-
-									if (data.frequency.toLowerCase() !== 'all' && data.frequency.toLowerCase() !== frequency.toLowerCase()) {
-										continue;
-									}
-
-									let thisCharge;
-
-									if (!seenValues[value]) {
-										thisCharge = `*${frequency}* price in ${country} is *${symbol}${value}*`;
-										seenValues[value] = true;
-										result = result ? `${result}\n${thisCharge}` : thisCharge;
-									}
+								// the API returns extra things for trial we don't need
+								if (type === 'trial') {
+									break;
 								}
 							}
 						}
 					}
+				}
 
-					const response = result;;
+				res.send(result);
+			})
+			.catch(function (){
+				const message = `It seems we don't have ${type} ${frequency} subscriptions in ${countryName}.`;
 
-					res.send(response);
-				})
-				.catch(function() {
-					res.send('Unable to display offers');
-				});
-		}
+				if (country.length <= 3) {
+					res.send(message);
+				}
+				else {
+					res.send(message + `\nYou may want to try again with ${country}\'s *3-letter code* (i.e. CAN for Canada) http://www.nationsonline.org/oneworld/country_code_list.htm`);
+				}
+			});
+
+	});
+
+	// Commands:
+	// - What currencies do we support?
+	robot.respond(/(w|W)hat currencies do we support\?/i, function (res) {
+
+		const currencies = {};
+
+		return API.offers.getOffers('all', null)
+			.then(function (offers) {
+
+				for (const keyOffer in offers) {
+					if (offers.hasOwnProperty(keyOffer)) {
+						const name = CURRENCY[offers[keyOffer].currency.toLowerCase()].name;
+
+						if (currencies[name]) {
+							currencies[name].push(offers[keyOffer].country);
+						}
+						else {
+							currencies[name] = [];
+						}
+					}
+				}
+				const response = [];
+
+				for (const currency in currencies) {
+					if (currencies.hasOwnProperty(currency)) {
+						const countryCount = currencies[currency].length;
+						let text;
+
+						if (countryCount === 1) {
+							const countryName = currencies[currency][0];
+							text = `*${currency}* in ${COUNTRIES[countryName.toLowerCase()]}`;
+						}
+						else {
+							text = `*${currency}* in ${countryCount} countries`;
+						}
+
+						response.push(text);
+					}
+				}
+
+				res.send(`We support:\n>${response.join('\n>')}`);
+			})
+			.catch(function () {
+				res.send(res.random['I don\'t know', '¯\_(ツ)_/¯']);
+			});
+	});
+
+	// Commands:
+	// - In what countries do we sell subscriptions?
+	robot.respond(/(i|I)n what countries do we sell subscriptions\?/i, function (res) {
+
+		const response = {};
+
+		return API.offers.getOffers('all', null)
+			.then(function (offers) {
+
+				for (const keyOffer in offers) {
+					if (offers.hasOwnProperty(keyOffer)) {
+						response[offers[keyOffer].country] = true;
+					}
+				}
+
+				res.send(`We sell subscriptions in: ${Object.keys(response).sort().join(', ')}`);
+			})
+			.catch(function () {
+				res.send(res.random['I don\'t know', '¯\_(ツ)_/¯']);
+			});
+	});
+
+	// Commands:
+	// - Can I purchase a premium subscription in Japan?
+	// - can I purchase a subscription in Sweden?
+	robot.respond(/(?:c|C)an I purchase a\s*(\s|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
+
+		const type = res.match[1];
+		const country = res.match[2];
+
+		return API.offers.getOffers(country, type)
+			.then(function () {
+				res.send(res.random([
+					'Yes',
+					'Yup',
+					'Yes, you can',
+					'You bet!'
+				]));
+			})
+			.catch(function () {
+				res.send(res.random([
+					'No',
+					'Nope',
+					`Sorry, not in ${country}.`
+				]));
+			});
 	});
 };
