@@ -58,7 +58,10 @@ const COUNTRIES = {
 const findKey = function (value, object) {
 	for (const key in object) {
 		if (object.hasOwnProperty(key)) {
+			console.log(value.toLowerCase())
+			console.log(object[key].toLowerCase())
 			if (value.toLowerCase() === object[key].toLowerCase()) {
+				console.log('RETURNING', key.toUpperCase);
 				return key.toUpperCase();
 			}
 		}
@@ -84,7 +87,7 @@ module.exports = function (robot) {
 			countryName = country;
 		}
 
-		return API.offers.getOffers(countryCode, type)
+		return API.offers.getOffers(countryCode.toUpperCase(), type)
 			.then(function (offers) {
 				let result;
 
@@ -199,8 +202,20 @@ module.exports = function (robot) {
 
 		const type = res.match[1];
 		const country = res.match[2];
+		let countryCode;
+		let countryName;
 
-		return API.offers.getOffers(country, type)
+		if (country.length > 3) {
+			countryCode = findKey(country, COUNTRIES) || country;
+			countryName = country;
+		}
+		else {
+			countryCode = country;
+			countryName = country;
+		}
+
+
+		return API.offers.getOffers(countryCode.toUpperCase(), type)
 			.then(function () {
 				res.send(res.random([
 					'Yes',
@@ -213,7 +228,7 @@ module.exports = function (robot) {
 				res.send(res.random([
 					'No',
 					'Nope',
-					`Sorry, not in ${country}.`
+					`Sorry, not in ${countryName}.`
 				]));
 			});
 	});
