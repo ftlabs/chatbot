@@ -15,10 +15,8 @@ module.exports = (robot) ->
 			if @message instanceof WebMessage
 				@send = (message) =>
 					@message.send(message);
-
-	# Set up the endpoints
-	require('./slack')(robot)
-	require('./websockets')(robot)
+				@fail = (message) =>
+					@message.send(message);
 
 	return {
 		Response: NewResponse

@@ -1,6 +1,7 @@
 // Description:
 //   Send a welcome message to new users.
 'use strict';
+const WebMessage = require('../lib/webinterfaces/webmessage');
 
 const SEEN_LOG_PREFIX = "USER_SEEN_V0.12_";
 const onboardMessage = [ '*Welcome to the FT Bot*.',
@@ -20,12 +21,20 @@ function genKey(robot, user) {
 
 function dmWelcomeMessage(res) {
 
+	if (res.message instanceof WebMessage) {
+		res.message.dm(onboardMessage);
+		res.message.finish();
+		return;
+	}
+
 	switch(res.robot.adapterName) {
 	case 'slack':
 		res.robot.send({room: res.message.user.name}, onboardMessage);
+		res.finish();
 		break;
 	default:
 		res.robot.send({user: res.message.user}, onboardMessage);
+		res.finish();
 	}
 }
 
@@ -38,17 +47,15 @@ module.exports = function (robot) {
 		// Since this is being handled in dm log the response without sending a message to the client.
 		require('../lib/autolog')(res).silentlyLog();
 
-		// In the case of the web interface directly send the message back instead of sending a dm
-		if (process.env.HUBOT_WEB_ENDPOINTS) {
-			return res.send(onboardMessage);
-		}
-
 		dmWelcomeMessage(res);
 	});
 };
 
 module.exports.onboard = function (res) {
 	let onboarded = false;
+	if (res.message instanceof WebMessage) {
+		return false;
+	}
 	if (process.env.NO_ONBOARDING) return false;
 	if (!res.robot.brain.get(genKey(res.robot, res.message.user))) {
 		dmWelcomeMessage(res);

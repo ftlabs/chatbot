@@ -9,15 +9,15 @@
 //   hubot alerts on/off - Turn alerts on or off for all followed topics (allows you to temporarily stop alerts without hubot forgetting what you are following)
 
 var pollInterval = 60000;
-var API          = require("../lib/ftapis");
-var numbers      = require('../lib/numberedlist');
+var API = require("../lib/ftapis");
+var numbers = require('../lib/numberedlist');
 
 function handleChat(mode, res) {
 		var topicContext = require('../lib/scopedlist').getTopicContext(res);
-		var scope        = require('../lib/scopedbrain')(res).scope;
-		var alertScopes  = res.robot.brain.get('alertScopes') || [];
-		var alertPos     = alertScopes.indexOf(scope);
-		var alertsAreOn  = alertPos !== -1;
+		var scope = require('../lib/scopedbrain')(res).scope;
+		var alertScopes = res.robot.brain.get('alertScopes') || [];
+		var alertPos = alertScopes.indexOf(scope);
+		var alertsAreOn = alertPos !== -1;
 
 		// Log the query to the database
 		res = require('../lib/autolog')(res);
@@ -65,7 +65,7 @@ function handleChat(mode, res) {
 				return;
 			}
 
-			if (mode == 'follow') {
+			if (mode === 'follow') {
 				API.follow.start(scope, topic).then(function(topicName) {
 
 					// TODO: What if the bot gets kicked out of a channel?  In that case you'd want to stop trying to send alerts to it
@@ -121,23 +121,23 @@ module.exports = function(robot) {
 	// NB: ensure the 1st arg is the 2nd match, ie include the initial term as the first match,
 	// for consistency in the handleChat code (so that res.match[2] is always the arg)
 
-	robot.respond(/(following)$/i,                   handleChat.bind(this, 'following'));
-	robot.respond(/(follow|alert)(?:\s+(.*))?$/i,    handleChat.bind(this, 'follow'));
-	robot.respond(/(unfollow)(?:\s+(.*))?$/i,        handleChat.bind(this, 'unfollow'));
+	robot.respond(/(following)$/i, handleChat.bind(this, 'following'));
+	robot.respond(/(follow|alert)(?:\s+(.*))?$/i, handleChat.bind(this, 'follow'));
+	robot.respond(/(unfollow)(?:\s+(.*))?$/i, handleChat.bind(this, 'unfollow'));
 	robot.respond(/(alerts)(?:\s+(on|off|\S.*))?$/i, handleChat.bind(this, 'alerts'));
-	robot.respond(/alerts\s+poll$/i,        poll.bind(this, 'all'));      // poll all users
-	robot.respond(/alerts\s+pollme$/i,      poll.bind(this, 'me'));       // poll just this user
+	robot.respond(/alerts\s+poll$/i, poll.bind(this, 'all'));      // poll all users
+	robot.respond(/alerts\s+pollme$/i, poll.bind(this, 'me'));       // poll just this user
 	robot.respond(/alerts\s+pollmeforce$/i, poll.bind(this, 'meforce'));  // poll just this user, don't ignore previously alerted articles
 
 	// Story numbering/formatting functions.  TODO: make these static properties of a Story class? duplicated in alerts, search, contextmanager
-	var formatter  = function(obj) {
+	var formatter = function(obj) {
 		var url = ('shorturl' in obj)? obj.shorturl : obj.url;
 		return obj.title + ' (' + url + ')';
 	};
 	var identifier = function(obj) { return obj.uuid; };
 
 	function poll(mode, res) { // mode and res will be undefined when poll() is invoked offline
-		var alertScopes   = robot.brain.get('alertScopes');
+		var alertScopes = robot.brain.get('alertScopes');
 
 		var ignoreHistory = (mode === 'meforce');
 		if (mode === 'me' || mode === 'meforce') {

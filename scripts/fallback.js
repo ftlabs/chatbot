@@ -3,6 +3,7 @@
 
 // Dependencies
 var onboard = require('./onboarding').onboard;
+var WebMessage = require('../lib/webinterfaces/webmessage');
 
 module.exports = function (robot) {
 
@@ -48,8 +49,13 @@ module.exports = function (robot) {
 				res.send("In this channel you don't need to start your message with " + m[1]);
 			} else if (!onboard(res)) { // Send them the welcome message if they need it
 				// otherwise let them know their query went unfulfilled
-				res.fail(failMessage);
+				if (res.message instanceof WebMessage) {
+					res.message.send(failMessage);
+				} else {
+					res.fail(failMessage);
+				}
 			}
 		}
+		res.message.finish();
 	});
 };

@@ -3,6 +3,8 @@
 // Commands
 
 // Dependencies
+'use strict';
+
 const moment = require('moment');
 const exphbs = require('express-handlebars');
 const socketio = require('socket.io');
@@ -11,8 +13,6 @@ const http = require('http');
 const fs = require('fs');
 const Handlebars = require('handlebars');
 const uniq = require('uniq');
-
-'use strict';
 
 const API_ENDPOINTS_REDIS_KEY = 'apiEndpoints';
 const apiEndpoints = [];
