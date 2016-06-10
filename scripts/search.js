@@ -117,17 +117,17 @@ const handleSearch = function(res, term) {
 					}
 				});
 			} else {
-				// API.topicsuggest.getSuggestions(term).then(function(suggestions) {
-				// 	if (suggestions) {
-				// 		suggestions = suggestions.slice(0,API.listLength.short);
-				// 		const topicContext = require('../lib/scopedlist').getTopicContext(res);
-				// 		if (suggestions.length > 0) {
-				// 			res.send('Topic suggestions for *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
-				// 		} else {
-				// 			res.send('No topic suggestions for *' + term + '*');
-				// 		}
-				// 	}
-				// });
+				API.topicsuggest.getSuggestions(term).then(function(suggestions) {
+					if (suggestions) {
+						suggestions = suggestions.slice(0,API.listLength.short);
+						const topicContext = require('../lib/scopedlist').getTopicContext(res);
+						if (suggestions.length > 0) {
+							res.send('Topic suggestions for *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
+						} else {
+							res.send('No topic suggestions for *' + term + '*');
+						}
+					}
+				});
 			}
 		})
 		.catch(function(err) {
