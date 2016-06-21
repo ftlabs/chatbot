@@ -46,22 +46,19 @@ const CURRENCY = {
 };
 
 const COUNTRIES = {
-	gbr: 'the UK',
-	usa: 'the US',
-	aus: 'Australia',
-	che: 'Switzerland',
-	hkg: 'Hong Kong',
-	jpn: 'Japan',
-	sgp: 'Singapore'
+	gbr: ['the UK', 'england', 'gb', 'britain'],
+	usa: ['the US'],
+	aus: ['Australia'],
+	che: ['Switzerland'],
+	hkg: ['Hong Kong'],
+	jpn: ['Japan'],
+	sgp: ['Singapore']
 };
 
 const findKey = function (value, object) {
 	for (const key in object) {
 		if (object.hasOwnProperty(key)) {
-			console.log(value.toLowerCase())
-			console.log(object[key].toLowerCase())
-			if (value.toLowerCase() === object[key].toLowerCase()) {
-				console.log('RETURNING', key.toUpperCase);
+			if (object[key].find(n => n.toLowerCase() === value) !== undefined) {
 				return key.toUpperCase();
 			}
 		}
@@ -161,7 +158,7 @@ module.exports = function (robot) {
 
 						if (countryCount === 1) {
 							const countryName = currencies[currency][0];
-							text = `*${currency}* in ${COUNTRIES[countryName.toLowerCase()]}`;
+							text = `*${currency}* in ${COUNTRIES[countryName.toLowerCase()][0]}`;
 						}
 						else {
 							text = `*${currency}* in ${countryCount} countries`;
@@ -198,8 +195,7 @@ module.exports = function (robot) {
 			});
 	});
 
-	robot.respond(/(?:c|C)an I purchase a\s*(\s|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
-
+	robot.respond(/can I (?:purchase|buy) a\s*(\s|premium|standard|trial)\s*sub(?:scription)? in(?:\s(.*))\??/i, function (res) {
 		const type = res.match[1];
 		const country = res.match[2];
 		let countryCode;
@@ -230,6 +226,7 @@ module.exports = function (robot) {
 					'Nope',
 					`Sorry, not in ${countryName}.`
 				]));
-			});
+			})
+			.then(() => res.finish());
 	});
 };
