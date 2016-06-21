@@ -67,11 +67,14 @@ const findKey = function (value, object) {
 
 module.exports = function (robot) {
 
-	robot.respond(/(?:w|W)hat(?:'|’)s the (?:price|cost) of (?:a|an)\s*(\s*|monthly|annual)\s*(\s*|premium|standard|trial)\s*subscription in(?:\s(.*))\?/i, function (res) {
+	robot.respond(/(?:what|how much)(?:'|’| i)s (?:the |a |an )?(?:price of |cost of |)(?:a|an)?(?: ft)?\s*(\s*|monthly|annual|yearly)(?: ft)?\s*(\s*|premium|standard|trial)(?: ft)?\s*sub(?:scription)?(?: in)?(\s+(.*))?\??$/i, function (res) {
 
-		const frequency = res.match[1];
-		const type = res.match[2];
-		let country = res.match[3];
+		let frequency = res.match[1] || 'annual';
+		if (frequency === 'yearly') {
+			frequency = 'annual';
+		}
+		const type = res.match[2] || 'standard';
+		let country = (res.match[3] || 'the uk').trim();
 		let countryCode;
 		let countryName;
 
@@ -197,7 +200,7 @@ module.exports = function (robot) {
 			.then(() => res.finish());
 	});
 
-	robot.respond(/can I (?:purchase|buy) a\s*(\s|premium|standard|trial)\s*sub(?:scription)? in(?:\s(.*))\??/i, function (res) {
+	robot.respond(/can I (?:purchase|buy) an?(?: ft)?\s*(\s|premium|standard|trial)(?: ft)?\s*sub(?:scription)? in(?:\s(.*))\??/i, function (res) {
 		const type = res.match[1];
 		const country = res.match[2];
 		let countryCode;
