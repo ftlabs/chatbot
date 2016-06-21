@@ -122,11 +122,11 @@ module.exports = function (robot) {
 
 				if (country.length <= 3) {
 					res.send(message);
-				}
-				else {
+				} else {
 					res.send(message + `\nYou may want to try again with ${country}\'s *3-letter code* (i.e. CAN for Canada) http://www.nationsonline.org/oneworld/country_code_list.htm`);
 				}
-			});
+			})
+			.then(() => res.finish());
 
 	});
 
@@ -172,7 +172,8 @@ module.exports = function (robot) {
 			})
 			.catch(function () {
 				res.send(res.random['I don\'t know', '¯\_(ツ)_/¯']);
-			});
+			})
+			.then(() => res.finish());
 	});
 
 	robot.respond(/countries/i, function (res) {
@@ -192,7 +193,8 @@ module.exports = function (robot) {
 			})
 			.catch(function () {
 				res.send(res.random['I don\'t know', '¯\_(ツ)_/¯']);
-			});
+			})
+			.then(() => res.finish());
 	});
 
 	robot.respond(/can I (?:purchase|buy) a\s*(\s|premium|standard|trial)\s*sub(?:scription)? in(?:\s(.*))\??/i, function (res) {
