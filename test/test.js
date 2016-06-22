@@ -176,7 +176,7 @@ describe("Replies correctly to", function() {
 		co(function *() {
 			yield room.user.say('alice', command);
 			expect(room.messages.length).to.eql(2);
-			expect(room.messages[1][1]).to.contain('We sell subscriptions in:');
+			expect(room.messages[1][1]).to.match(/We sell subscriptions in: ([A-Z]{3},{0,1} {0,1})*/);
 			done();
 		}).catch(e => done(e));
 	});
