@@ -13,6 +13,19 @@ as an initial experiment in accessing FT content via a Chatbot in a companies in
 * Slack
 * GChat
 * [Web Interface](http://ftlabs-chatbot-hubot.herokuapp.com/v1/web-widget)
+* rest interface: http://ftlabs-chatbot-test.herokuapp.com/v1/rest
+
+```
+Example Post request
+
+POST to http://ftlabs-chatbot-test.herokuapp.com/v1/rest
+
+content: application/json
+
+{
+	message: "recommend apple"
+}
+```
 
 The project has been resurrected as of May 30th 2016 due to growing interest in Chatbots in the wider media community.
 
