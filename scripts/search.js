@@ -120,18 +120,19 @@ const handleSearch = function(res, term) {
 					}
 				});
 			} else {
-				API.topicsuggest.getSuggestions(term).then(function(suggestions) {
-					if (suggestions) {
-						suggestions = suggestions.slice(0,API.listLength.short);
-						const topicContext = require('../lib/scopedlist').getTopicContext(res);
-						if (suggestions.length > 0) {
-							res.send('Topic suggestions for *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
-						} else {
-							res.send('No topic suggestions for *' + term + '*');
-						}
-						res.finish();
-					}
-				});
+
+			// 	API.topicsuggest.getSuggestions(term).then(function(suggestions) {
+			// 		if (suggestions) {
+			// 			suggestions = suggestions.slice(0,API.listLength.short);
+			// 			const topicContext = require('../lib/scopedlist').getTopicContext(res);
+			// 			if (suggestions.length > 0) {
+			// 				res.send('Topic suggestions for *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
+			// 			} else {
+			// 				res.send('No topic suggestions for *' + term + '*');
+			// 			}
+			// 			res.finish();
+			// 		}
+			// 	});
 			}
 		})
 		.catch(function(err) {
@@ -145,26 +146,26 @@ const handleSearch = function(res, term) {
 
 module.exports = function (robot) {
 
-	robot.respond(/(topics|suggest)\s+(\S.*)/i, function (res) {
-		res = require('../lib/autolog')(res); // Log the query to the database
+	// robot.respond(/(topics|suggest)\s+(\S.*)/i, function (res) {
+	// 	res = require('../lib/autolog')(res); // Log the query to the database
 
-		const term = res.match[2].toLowerCase();
+	// 	const term = res.match[2].toLowerCase();
 
-		if (term === 'all' || term === 'clear') return;
+	// 	if (term === 'all' || term === 'clear') return;
 
-		const topicContext = require('../lib/scopedlist').getTopicContext(res);
+	// 	const topicContext = require('../lib/scopedlist').getTopicContext(res);
 
-		API.topicsuggest.getSuggestions(term).then(function(suggestions) {
-			if (suggestions.length > 0) {
-				suggestions = suggestions.slice(0,API.listLength.short);
-				res.send('FT topics matching *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
-				res.finish();
-			} else {
-				res.send('Nothing found for *' + term + '*.  Try a topic, or the name of a company, industry or person.');
-				res.finish();
-			}
-		});
-	});
+	// 	API.topicsuggest.getSuggestions(term).then(function(suggestions) {
+	// 		if (suggestions.length > 0) {
+	// 			suggestions = suggestions.slice(0,API.listLength.short);
+	// 			res.send('FT topics matching *' + term + '*:\n' + numbers(topicContext.add(suggestions)) + '\nTo follow a topic, say for example `follow T3`');
+	// 			res.finish();
+	// 		} else {
+	// 			res.send('Nothing found for *' + term + '*.  Try a topic, or the name of a company, industry or person.');
+	// 			res.finish();
+	// 		}
+	// 	});
+	// });
 
 	robot.respond(/(latest|search)$/i, function(res){
 		res = require('../lib/autolog')(res);

@@ -1,5 +1,4 @@
 
-request = require 'request-promise'
 WebMessage = require('../webmessage')
 moment = require('moment')
 
