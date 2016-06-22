@@ -110,4 +110,110 @@ describe("Replies correctly to", function() {
 			done();
 		}).catch(e => done(e));
 	});
+
+	it("What's the cost of a monthly premium subscription in CAN?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1].replace(/\*/g,'')).to.match(/Monthly premium subscriptions in CAN cost \$(\d*)/);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("What's the price of a standard subscription in JPN?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1].replace(/\*/g,'')).to.match(/Monthly standard subscriptions in JPN cost ¥(.\d*\.{0,1}\d*)\nAnnual standard subscriptions in JPN cost ¥(.\d*\.{0,1}\d*)/);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("What's the price of a monthly subscription in ESP?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1].replace(/\*/g,'')).to.match(/Monthly standard subscriptions in ESP cost \€(\d*)/);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("What's the price of a subscription in AUS?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1].replace(/\*/g,'')).to.match(/Monthly standard subscriptions in AUS cost A\$(.\d*\.\d*)\nAnnual standard subscriptions in AUS cost A\$(.\d*\.\d*)/);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("What's the price of a subscription?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1].replace(/\*/g,'')).to.match(/Monthly standard subscriptions in the uk cost £(.\d*\.\d*)\nAnnual standard subscriptions in the uk cost £(.\d*\.\d*)/);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("currencies", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1]).to.contain('We support:');
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("countries", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages.length).to.eql(2);
+			expect(room.messages[1][1]).to.contain('We sell subscriptions in:');
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("can I buy a subscription in GBR?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages).to.eql([
+				[ 'alice', command ],
+				[ 'hubot', 'Yes, you can buy a subscription in GBR.' ]
+			]);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("can I buy a trial subscription in GBR?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages).to.eql([
+				[ 'alice', command ],
+				[ 'hubot', 'Yes, you can buy a trial subscription in GBR.' ]
+			]);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it("can I buy a subscription in ABC?", function(done) {
+		const command = 'hubot ' + this.test.title;
+		co(function *() {
+			yield room.user.say('alice', command);
+			expect(room.messages).to.eql([
+				[ 'alice', command ],
+				[ 'hubot', 'Sorry, you cannot buy a subscription in ABC.' ]
+			]);
+			done();
+		}).catch(e => done(e));
+	});
 });
