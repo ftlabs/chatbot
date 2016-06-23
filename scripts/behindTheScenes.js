@@ -4,6 +4,7 @@
 
 var API = require("../lib/ftapis");
 var redis = require('../lib/redis');
+var os = require('os');
 
 module.exports = function (robot) {
 
@@ -88,6 +89,20 @@ module.exports = function (robot) {
 			}
 		});
 		callback = robot.listeners[robot.listeners.length -1].callback;
+	});
+
+	commands.push('__hostid');
+	robot.respond('__hostid', function (res) {
+		const ni = os.networkInterfaces();
+		res.send(`
+${os.homedir()}
+${os.hostname()}
+${os.arch()}
+${os.type()}, ${os.platform()}, ${os.release()}
+${os.cpus().map(cpu => cpu.model).join(", ")}
+${Object.keys(ni).map(k => k + ': ' + ni[k][0].address).join(', ')}
+		`);
+		return res.finish();
 	});
 
 	commands.push('__redis clear logs');
