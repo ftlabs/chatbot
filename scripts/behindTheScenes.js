@@ -95,12 +95,12 @@ module.exports = function (robot) {
 	robot.respond('__hostid', function (res) {
 		const ni = os.networkInterfaces();
 		res.send(`
-Home: ${os.homedir()}
-Hostname: ${os.hostname()}
-Arch" ${os.arch()}
-OS: ${os.type()}, ${os.platform()}, ${os.release()}
-CPUs: ${os.cpus().map(cpu => cpu.model).join(", ")}
-Network: ${Object.keys(ni).map(k => k + ': ' + ni[k][0].address).join(', ')}
+\u2022 Home: ${os.homedir()}
+\u2022 Hostname: ${os.hostname()}
+\u2022 Arch: ${os.arch()}
+\u2022 OS: ${os.type()}, ${os.platform()}, ${os.release()}
+\u2022 CPUs: ${os.cpus().map(cpu => cpu.model).join(", ")}
+\u2022 Network: ${Object.keys(ni).map(k => k + ': ' + ni[k][0].address).join(', ')}
 		`);
 		return res.finish();
 	});
