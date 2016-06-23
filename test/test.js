@@ -55,7 +55,7 @@ describe("Replies correctly to", function() {
 			yield room.user.say('alice', command);
 			expect(room.messages).to.eql([
 				['alice', command],
-				['hubot', "If interested in, say, apple:\n• search apple\n• price apple\n• recommend apple\n• topics apple\nFor more on an article:\n• A2\nor a topic:\n• T1\n• follow T2\nMore commands and details:\n• help all"],
+				['hubot', "If interested in, say, apple:\n• search apple\n• price apple\n• recommend apple\nFor more on an article:\n• A2\nMore commands and details:\n• help all"],
 			]);
 			done();
 		}).catch(e => done(e));

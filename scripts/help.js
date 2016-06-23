@@ -16,7 +16,7 @@
 //                    and a list of regexes matching the raw text of the individual command help texts
 //                                          (the trick is to ensure there are no false positives).
 // NB, if a particular command help text is changed, the fullHelptemplate may also need adjusting.
-var fullHelpTemplate = [
+const fullHelpTemplate = [
 	['*Searching for content*', ['search', 'articles', 'A<id>', 'topics', 'T<id>', 'define', 'definitions', 'zeitgeist']],
 	['*Querying financial data*', ['price', 'prices', 'recommend']],
 	['*Sending/sharing*', ['share']],
@@ -28,19 +28,15 @@ var fullHelpTemplate = [
 	]]
 ];
 
-var bullet = "\u2022";
+const bullet = "\u2022";
 
-var initialHelpTextLines = [
+const initialHelpTextLines = [
 	'If interested in, say, apple:',
 	bullet + ' search apple',
 	bullet + ' price apple',
 	bullet + ' recommend apple',
-	bullet + ' topics apple',
 	'For more on an article:',
 	bullet + ' A2',
-	'or a topic:',
-	bullet + ' T1',
-	bullet + ' follow T2',
 	'More commands and details:',
 	bullet + ' help all'
 ];
