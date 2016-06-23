@@ -92,7 +92,7 @@ module.exports = function (robot) {
 	});
 
 	commands.push('__hostid');
-	robot.respond('__hostid', function (res) {
+	robot.respond(/__hostid/, function (res) {
 		const ni = os.networkInterfaces();
 		res.send(`
 \u2022 Home: ${os.homedir()}
