@@ -10,7 +10,7 @@
 
 'use strict';
 
-  
+
 // The structure is a list of sections,
 // where each section has a name and some descriptive text, e.g. *Basic Search*)
 //                    and a list of regexes matching the raw text of the individual command help texts
@@ -20,7 +20,6 @@ var fullHelpTemplate = [
 	['*Searching for content*', ['search', 'articles', 'A<id>', 'topics', 'T<id>', 'define', 'definitions', 'zeitgeist']],
 	['*Querying financial data*', ['price', 'prices', 'recommend']],
 	['*Sending/sharing*', ['share']],
-	['*Alerting*', ['follow', 'unfollow', 'following', 'alerts']],
 	['*Offers*', [
 		`What's is the cost of <a | an> <annual | monthly | > <premium | standard | trial | > subscription in <country>?`,
 		'currencies',
