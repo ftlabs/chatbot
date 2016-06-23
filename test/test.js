@@ -112,6 +112,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("What's the cost of a monthly premium subscription in CAN?", function(done) {
+		nock.cost('premium', 'CAN');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -122,6 +123,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("What's the price of a standard subscription in JPN?", function(done) {
+		nock.cost('standard', 'JPN');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -132,6 +134,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("What's the price of a monthly subscription in ESP?", function(done) {
+		nock.cost('standard', 'ESP');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -142,6 +145,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("What's the price of a subscription in AUS?", function(done) {
+		nock.cost('standard', 'AUS');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -150,8 +154,8 @@ describe("Replies correctly to", function() {
 			done();
 		}).catch(e => done(e));
 	});
-
 	it("What's the price of a subscription?", function(done) {
+		nock.cost('standard', 'GBR');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -160,8 +164,8 @@ describe("Replies correctly to", function() {
 			done();
 		}).catch(e => done(e));
 	});
-
 	it("currencies", function(done) {
+		nock.allOffers();
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -172,6 +176,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("countries", function(done) {
+		nock.allOffers();
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -182,6 +187,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("can I buy a subscription in GBR?", function(done) {
+		nock.cost('premium', 'GBR');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -194,6 +200,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("can I buy a trial subscription in GBR?", function(done) {
+		nock.cost('trial', 'GBR');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);
@@ -206,6 +213,7 @@ describe("Replies correctly to", function() {
 	});
 
 	it("can I buy a subscription in ABC?", function(done) {
+		nock.cost('standard', 'ABC');
 		const command = 'hubot ' + this.test.title;
 		co(function *() {
 			yield room.user.say('alice', command);

@@ -30,12 +30,22 @@ The very basic way to start is:
 
 ```
 $ npm install
-$ bin/hubot
+$ npm start
 ```
 
 This will start the bot in shell mode and interactive. If the HUBOT_SLACK_TOKEN is set, it will default to slack. Chat with `ftbottest` when developing locally.
 
 For full usage of Chatbot you will require the following environment variables (found in LastPass. Internal FT usage only)
+
+## Tests
+
+To run tests:
+
+```
+$ npm test
+```
+
+Add tests to `/test/`, mocking any server calls with `nock` (see examples in `/test/nock.js`)
 
 ## Basic
 
