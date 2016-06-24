@@ -67,9 +67,9 @@ const findKey = function (value, object) {
 
 module.exports = function (robot) {
 
-	robot.respond(/(?:what|how much)(?:'|’| i)s (?:the |a |an )?(?:price of |cost of |)(?:a|an)?(?: ft)?\s*(\s*|monthly|annual|yearly)(?: ft)?\s*(\s*|premium|standard|trial)(?: ft)?\s*sub(?:scription)?(?: in)?(\s+(.*))?\??$/i, function (res) {
+	robot.respond(/(?:what|how much)(?:'|’| i)s (?:the |a |an )?(?:price of |cost of |)(?:a|an)?(?: ft)?\s*(\s*|monthly|annual|yearly)(?: ft)?\s*(\s*|premium|standard|trial)(?: ft)?\s*sub(?:scription)?(?: in)?(\s+([^\?]*))?\??$/i, function (res) {
 
-		let frequency = res.match[1] || 'annual';
+		let frequency = res.match[1];
 		if (frequency === 'yearly') {
 			frequency = 'annual';
 		}
@@ -200,7 +200,7 @@ module.exports = function (robot) {
 			.then(() => res.finish());
 	});
 
-	robot.respond(/can I (?:purchase|buy) an?(?: ft)?\s*(\s|premium|standard|trial)(?: ft)?\s*sub(?:scription)? in(?:\s(.*))\??/i, function (res) {
+	robot.respond(/can I (?:purchase|buy) an?(?: ft)?\s*(\s|premium|standard|trial)(?: ft)?\s*sub(?:scription)? in(?:\s([^?]*))\??/i, function (res) {
 		const type = res.match[1];
 		const country = res.match[2];
 		let countryCode;
@@ -215,22 +215,14 @@ module.exports = function (robot) {
 			countryName = country;
 		}
 
+		const typeFormatted = type.trim() ? ` ${type} ` : ' ';
 
 		return API.offers.getOffers(countryCode.toUpperCase(), type)
 			.then(function () {
-				res.send(res.random([
-					'Yes',
-					'Yup',
-					'Yes, you can',
-					'You bet!'
-				]));
+				res.send(`Yes, you can buy a${typeFormatted}subscription in ${countryName}.`);
 			})
 			.catch(function () {
-				res.send(res.random([
-					'No',
-					'Nope',
-					`Sorry, not in ${countryName}.`
-				]));
+				res.send(`Sorry, you cannot buy a${typeFormatted}subscription in ${countryName}.`);
 			})
 			.then(() => res.finish());
 	});
