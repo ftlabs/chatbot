@@ -79,7 +79,6 @@ You can only pick one:
 
 ## API keys
 
-* USER_PREFS_API_KEY - next-follow api
 * ELASTIC_SEARCH_KEY - next-search api
 * EMAILTHIS_RECAPTCHA_KEY - email this api
 * EMAILTHIS_SECRET - email this api

@@ -4,14 +4,15 @@
 // Commands:
 //   hubot zeitgeist <type> - Displays most common recent themes (<type> can be people, orgs, regions, topics; or leave blank)
 
-var API = require("../lib/ftapis");
-var numbers = require('../lib/numberedlist');
+'use strict';
+const API = require("../lib/ftapis");
+const numbers = require('../lib/numberedlist');
 
-var handleZeitgeistRecency = function(recencyFnName, recencyText, res){
+const handleZeitgeistRecency = function(recencyFnName, recencyText, res){
 	res = require('../lib/autolog')(res); // Log the query to the database
-	var flavour         = res.match[1];
-	var display_flavour = flavour ? ' *' + flavour + '*' : '';
-	var topicContext    = require('../lib/scopedlist').getTopicContext(res);
+	const flavour = res.match[1];
+	const display_flavour = flavour ? ' *' + flavour + '*' : '';
+	const topicContext = require('../lib/scopedlist').getTopicContext(res);
 
 	API.primaryThemes[recencyFnName](flavour).then(function(topics) {
 		if (topics.length === 0) {
@@ -34,8 +35,8 @@ var handleZeitgeistRecency = function(recencyFnName, recencyText, res){
 };
 
 module.exports = function (robot) {
-	robot.respond(/(?:z100|zeitgeist100)\s*$/i,      handleZeitgeistRecency.bind(this, 'getPrimaryThemes100Days', 'over the last 100 days'));
+	robot.respond(/(?:z100|zeitgeist100)\s*$/i, handleZeitgeistRecency.bind(this, 'getPrimaryThemes100Days', 'over the last 100 days'));
 	robot.respond(/(?:z100|zeitgeist100)\s+(\S.*)/i, handleZeitgeistRecency.bind(this, 'getPrimaryThemes100Days', 'over the last 100 days'));
-	robot.respond(/(?:z|zeitgeist)\s*$/i,            handleZeitgeistRecency.bind(this, 'getPrimaryThemes1Week',   'over the last few days'));
-	robot.respond(/(?:z|zeitgeist)\s+(\S.*)$/i,      handleZeitgeistRecency.bind(this, 'getPrimaryThemes1Week',   'over the last few days'));
+	robot.respond(/(?:z|zeitgeist)\s*$/i, handleZeitgeistRecency.bind(this, 'getPrimaryThemes1Week', 'over the last few days'));
+	robot.respond(/(?:z|zeitgeist)\s+(\S.*)$/i, handleZeitgeistRecency.bind(this, 'getPrimaryThemes1Week', 'over the last few days'));
 };
