@@ -1,0 +1,79 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:debug:20170905':
+    - hubot > express > connect > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - socket.io > socket.io-adapter > socket.io-parser > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > compression > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > body-parser > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > connect-timeout > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > express-session > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > finalhandler > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > morgan > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-static > send > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-index > debug:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:hawk:20160119':
+    - hubot-yammer > yammer > request > hawk:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:http-signature:20150122':
+    - hubot-yammer > yammer > request > http-signature:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:mime:20170907':
+    - hubot > express > connect > serve-static > send > mime:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot-yammer > yammer > request > mime:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot-yammer > yammer > request > form-data > mime:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:ms:20170412':
+    - hubot > express > connect > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - socket.io > socket.io-adapter > socket.io-parser > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > connect-timeout > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > compression > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-index > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > morgan > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > finalhandler > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > express-session > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > connect-timeout > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-static > send > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > body-parser > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-static > send > debug > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-favicon > ms:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:negotiator:20160616':
+    - hubot > express > connect > compression > accepts > negotiator:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot > express > connect > serve-index > accepts > negotiator:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:qs:20140806-1':
+    - hubot-yammer > yammer > request > qs:
+        patched: '2018-12-03T12:48:23.825Z'
+  'npm:request:20160119':
+    - hubot-yammer > request:
+        patched: '2018-12-03T12:48:23.825Z'
+    - hubot-yammer > yammer > request:
+        patched: '2018-12-03T12:48:23.825Z'
